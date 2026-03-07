@@ -641,6 +641,112 @@ const styles = `
 
 
   /* ══════════════════════════════════════════════════
+     SHARE / EXPORT MODAL
+  ══════════════════════════════════════════════════ */
+  .share-modal-backdrop {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(2, 5, 16, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    animation: shareBackdropIn 0.2s ease both;
+  }
+  @keyframes shareBackdropIn { from{opacity:0;} to{opacity:1;} }
+
+  .share-modal {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 22px;
+    padding: 28px 24px 24px;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(108,99,255,0.15);
+    animation: shareModalIn 0.3s cubic-bezier(0.16,1,0.3,1) both;
+    position: relative;
+  }
+  @keyframes shareModalIn {
+    from { opacity:0; transform:scale(0.9) translateY(20px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+
+  .share-modal-hdr {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .share-modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; color: var(--text); font-weight: 700;
+  }
+  .share-modal-close {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    border: 1px solid var(--border2); background: var(--surface2);
+    color: var(--text-faint); font-size: 13px; cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .share-modal-close:hover {
+    background: rgba(248,113,113,0.1); color: var(--red);
+    border-color: rgba(248,113,113,0.3);
+  }
+  .share-modal-sub {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 2px;
+    color: var(--text-faint); margin-bottom: 20px;
+  }
+
+  .share-options { display: flex; flex-direction: column; gap: 10px; }
+
+  .share-option {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border-radius: 14px;
+    cursor: pointer; border: 1px solid var(--border2);
+    background: var(--surface2); transition: all 0.2s;
+    text-align: left; width: 100%;
+  }
+  .share-option:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  .share-option.opt-wa  { border-color: rgba(37,211,102,0.2); }
+  .share-option.opt-wa:hover  {
+    background: rgba(37,211,102,0.07);
+    border-color: rgba(37,211,102,0.45);
+    box-shadow: 0 6px 20px rgba(37,211,102,0.12);
+  }
+  .share-option.opt-print { border-color: rgba(108,99,255,0.2); }
+  .share-option.opt-print:hover {
+    background: rgba(108,99,255,0.07);
+    border-color: rgba(108,99,255,0.45);
+    box-shadow: 0 6px 20px rgba(108,99,255,0.12);
+  }
+  .share-option.opt-copy { border-color: rgba(45,212,191,0.2); }
+  .share-option.opt-copy:hover {
+    background: rgba(45,212,191,0.07);
+    border-color: rgba(45,212,191,0.45);
+    box-shadow: 0 6px 20px rgba(45,212,191,0.12);
+  }
+  .share-option.opt-txt { border-color: rgba(245,166,35,0.2); }
+  .share-option.opt-txt:hover {
+    background: rgba(245,166,35,0.07);
+    border-color: rgba(245,166,35,0.45);
+    box-shadow: 0 6px 20px rgba(245,166,35,0.12);
+  }
+
+  .share-opt-icon {
+    font-size: 26px; flex-shrink: 0;
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--surface3); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .share-opt-label {
+    font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3;
+  }
+  .share-opt-sub {
+    font-size: 11.5px; color: var(--text-faint); margin-top: 2px;
+  }
+
+  /* ══════════════════════════════════════════════════
      SCAN OVERLAY — VAIDYADRISHTI NEXUS SCAN
      DESIGN: Full-screen split — hex grid LEFT, terminal RIGHT
   ══════════════════════════════════════════════════ */
@@ -1706,21 +1812,6 @@ export default function PrescriptionScanner() {
                   </div>
                 </button>
 
-                <button className="share-option opt-copy" onClick={doCopyClipboard}>
-                  <span className="share-opt-icon">{copyShareDone ? "✅" : "📋"}</span>
-                  <div>
-                    <div className="share-opt-label">{copyShareDone ? "Copied!" : "Copy to Clipboard"}</div>
-                    <div className="share-opt-sub">Paste anywhere — notes, email, SMS</div>
-                  </div>
-                </button>
-
-                <button className="share-option opt-txt" onClick={doDownloadTxt}>
-                  <span className="share-opt-icon">📄</span>
-                  <div>
-                    <div className="share-opt-label">Download .txt File</div>
-                    <div className="share-opt-sub">Save as plain text document</div>
-                  </div>
-                </button>
 
               </div>
             </div>
