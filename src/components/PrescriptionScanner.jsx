@@ -417,24 +417,13 @@ export default function PrescriptionScanner() {
               { type: "image_url", image_url: { url: `data:${imageBase64.type};base64,${imageBase64.data}` } },
               {
                 type: "text",
-                text: `You are a medical prescription scanner. Analyze this image and extract ALL medication details exactly as written.
-Return ONLY a JSON object (no markdown, no backticks):
-{
-  "patientName": "string or null",
-  "doctorName": "string or null",
-  "date": "string or null",
-  "medications": [{
-    "name": "exact name as written",
-    "description": "one concise sentence about what this medicine is used for",
-    "dosage": "strength e.g. 500mg",
-    "frequency": "how often e.g. twice daily",
-    "duration": "e.g. 7 days",
-    "instructions": "special instructions e.g. after meals",
-    "quantity": "number of tablets if mentioned"
-  }],
-  "generalNotes": "any other notes or null"
-}
-Extract every medication. For missing fields use JSON null (not the string "null"). Only include fields that are clearly visible in the prescription. Be precise and faithful.\`
+                text: "You are a medical prescription scanner. Analyze this image and extract ALL medication details exactly as written. " +
+                  "Return ONLY a JSON object with no markdown and no backticks. " +
+                  "Fields: patientName, doctorName, date, generalNotes (all string or null). " +
+                  "medications array with: name (exact as written), description (1-2 sentences what this medicine is and what condition it treats - NEVER null), " +
+                  "dosage, frequency, duration, instructions, quantity (all string or null). " +
+                  "IMPORTANT: Every medication MUST have a description based on your medical knowledge. " +
+                  "For all other missing fields use JSON null. Be precise and faithful to the prescription."
               }
             ]
           }]
@@ -444,7 +433,7 @@ Extract every medication. For missing fields use JSON null (not the string "null
       if (data.error) throw new Error("Groq Error: " + data.error.message);
       if (!data.choices) throw new Error("No response: " + JSON.stringify(data));
       const text = data.choices[0].message.content;
-      parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+      parsed = JSON.parse(text.replaceAll("```json", "").replaceAll("```", "").trim());
     } catch (err) {
       apiError = err.message || "Failed to scan. Please try again.";
     }
