@@ -420,199 +420,214 @@ const styles = `
   .err-box { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 9px; align-items: flex-start; font-size: 13px; color: var(--red); line-height: 1.5; }
 
   /* ══════════════════════════════════════════════
-     SCAN OVERLAY — VAIDYADRISHTI NEURAL SCAN
+     SCAN OVERLAY — VAIDYADRISHTI MOLECULE SCAN
   ══════════════════════════════════════════════ */
   .scan-overlay {
     position: fixed; inset: 0; z-index: 100;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: clamp(14px, 2.5vh, 24px);
-    background: radial-gradient(ellipse 120% 100% at 50% 50%, #060818 0%, #020408 100%);
-    animation: soIn 0.45s ease both;
+    gap: clamp(16px, 3vh, 28px);
+    background: #020510;
+    animation: soIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
     overflow: hidden;
   }
-  @keyframes soIn { from{opacity:0;} to{opacity:1;} }
+  @keyframes soIn  { from { opacity:0; transform:scale(0.98); } to { opacity:1; transform:scale(1); } }
   .scan-overlay.exit { animation: soOut 0.45s ease forwards; }
-  @keyframes soOut { to{opacity:0;transform:scale(1.02);} }
+  @keyframes soOut { to { opacity:0; } }
 
-  /* ── DEEP BACKGROUND GLOW ── */
+  /* Void ambient */
   .scan-overlay::before {
-    content:''; position:absolute; inset:0; pointer-events:none;
+    content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(108,99,255,0.06) 0%, transparent 65%),
-      radial-gradient(ellipse 30% 30% at 50% 50%, rgba(167,139,250,0.04) 0%, transparent 50%);
-    animation: bgPulse 4s ease-in-out infinite;
+      radial-gradient(ellipse 55% 55% at 50% 50%, rgba(108,99,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 40% at 20% 80%, rgba(45,212,191,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 25% 30% at 80% 20%, rgba(245,166,35,0.04) 0%, transparent 50%);
   }
-  @keyframes bgPulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
 
-  /* ── STAR FIELD ── */
-  .scan-particles { position:absolute; inset:0; pointer-events:none; }
-  .scan-particles::before {
-    content:''; position:absolute; inset:0;
-    background-image:
-      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 85% 8%, rgba(167,139,250,0.6) 0%, transparent 100%),
-      radial-gradient(1px 1px at 25% 75%, rgba(45,212,191,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 70% 88%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 45% 35%, rgba(245,166,35,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 90% 55%, rgba(255,255,255,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 5% 50%, rgba(167,139,250,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
-      radial-gradient(1.5px 1.5px at 35% 90%, rgba(45,212,191,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 80% 40%, rgba(245,166,35,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 15% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 55% 65%, rgba(167,139,250,0.35) 0%, transparent 100%);
-    animation: starTwinkle 5s ease-in-out infinite;
+  /* ── FLOATING PARTICLES ── */
+  .scan-particles { position:absolute; inset:0; pointer-events:none; z-index:1; }
+  .sp {
+    position:absolute; border-radius:50%;
+    animation: spFloat linear infinite;
   }
-  .scan-particles::after {
-    content:''; position:absolute; inset:0;
-    background-image:
-      radial-gradient(1px 1px at 20% 60%, rgba(255,255,255,0.4) 0%, transparent 100%),
-      radial-gradient(1px 1px at 75% 30%, rgba(108,99,255,0.5) 0%, transparent 100%),
-      radial-gradient(1px 1px at 40% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 95% 70%, rgba(45,212,191,0.4) 0%, transparent 100%),
-      radial-gradient(1.5px 1.5px at 50% 50%, rgba(245,166,35,0.3) 0%, transparent 100%),
-      radial-gradient(1px 1px at 30% 45%, rgba(255,255,255,0.35) 0%, transparent 100%);
-    animation: starTwinkle 5s ease-in-out infinite 2.5s;
+  .sp:nth-child(1)  { width:2px;height:2px;background:rgba(167,139,250,0.7);left:10%;top:80%;animation-duration:12s;animation-delay:0s; }
+  .sp:nth-child(2)  { width:1px;height:1px;background:rgba(45,212,191,0.6);left:25%;top:70%;animation-duration:14s;animation-delay:-3s; }
+  .sp:nth-child(3)  { width:2px;height:2px;background:rgba(245,166,35,0.6);left:40%;top:90%;animation-duration:10s;animation-delay:-6s; }
+  .sp:nth-child(4)  { width:1px;height:1px;background:rgba(255,255,255,0.4);left:60%;top:85%;animation-duration:16s;animation-delay:-2s; }
+  .sp:nth-child(5)  { width:2px;height:2px;background:rgba(108,99,255,0.7);left:75%;top:75%;animation-duration:11s;animation-delay:-8s; }
+  .sp:nth-child(6)  { width:1px;height:1px;background:rgba(167,139,250,0.5);left:88%;top:90%;animation-duration:13s;animation-delay:-4s; }
+  .sp:nth-child(7)  { width:2px;height:2px;background:rgba(45,212,191,0.5);left:5%;top:60%;animation-duration:15s;animation-delay:-7s; }
+  .sp:nth-child(8)  { width:1px;height:1px;background:rgba(255,255,255,0.35);left:50%;top:95%;animation-duration:9s;animation-delay:-1s; }
+  .sp:nth-child(9)  { width:3px;height:3px;background:rgba(245,166,35,0.4);left:85%;top:50%;animation-duration:18s;animation-delay:-5s; }
+  .sp:nth-child(10) { width:1px;height:1px;background:rgba(108,99,255,0.5);left:15%;top:95%;animation-duration:12s;animation-delay:-9s; }
+  @keyframes spFloat {
+    0%   { transform: translateY(0)   translateX(0)   scale(1);   opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-100vh) translateX(20px) scale(0); opacity: 0; }
   }
-  @keyframes starTwinkle { 0%,100%{opacity:1;} 50%{opacity:0.25;} }
 
   /* ── SCAN IMAGE FRAME ── */
   .scan-frame {
     position:relative; z-index:5;
-    width: clamp(160px, 32vw, 240px);
+    width: clamp(150px, 28vw, 220px);
     border-radius:14px; overflow:hidden;
-    border:1px solid rgba(108,99,255,0.35);
-    box-shadow: 0 0 0 1px rgba(108,99,255,0.1), 0 0 30px rgba(108,99,255,0.2), 0 0 60px rgba(108,99,255,0.06);
+    border: 1px solid rgba(108,99,255,0.3);
+    box-shadow: 0 0 30px rgba(108,99,255,0.18), 0 0 60px rgba(108,99,255,0.06);
   }
-  .scan-frame img { width:100%; max-height:160px; object-fit:contain; display:block; filter:brightness(0.35) saturate(0.4) hue-rotate(240deg); }
+  .scan-frame img { width:100%; max-height:150px; object-fit:contain; display:block; filter:brightness(0.3) saturate(0.3) hue-rotate(210deg); }
   .scan-frame::after {
     content:''; position:absolute; inset:0; pointer-events:none;
-    background: linear-gradient(rgba(108,99,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(108,99,255,0.05) 1px, transparent 1px);
-    background-size: 18px 18px;
+    background: linear-gradient(rgba(108,99,255,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(108,99,255,0.06) 1px, transparent 1px);
+    background-size: 16px 16px;
   }
-  .scan-corner { position:absolute; width:16px; height:16px; border-color:rgba(167,139,250,0.8); border-style:solid; }
-  .sc-tl{top:6px;left:6px;border-width:2px 0 0 2px;} .sc-tr{top:6px;right:6px;border-width:2px 2px 0 0;}
-  .sc-bl{bottom:6px;left:6px;border-width:0 0 2px 2px;} .sc-br{bottom:6px;right:6px;border-width:0 2px 2px 0;}
+  .scan-corner { position:absolute; width:14px; height:14px; border-color:rgba(167,139,250,0.75); border-style:solid; }
+  .sc-tl{top:5px;left:5px;border-width:2px 0 0 2px;} .sc-tr{top:5px;right:5px;border-width:2px 2px 0 0;}
+  .sc-bl{bottom:5px;left:5px;border-width:0 0 2px 2px;} .sc-br{bottom:5px;right:5px;border-width:0 2px 2px 0;}
   .scan-beam {
     position:absolute; left:0; right:0; height:2px; z-index:2;
-    background: linear-gradient(90deg, transparent 0%, rgba(108,99,255,0.3) 20%, rgba(167,139,250,0.9) 45%, rgba(220,210,255,1) 50%, rgba(167,139,250,0.9) 55%, rgba(108,99,255,0.3) 80%, transparent 100%);
-    box-shadow: 0 0 8px rgba(167,139,250,0.7), 0 0 18px rgba(108,99,255,0.4), 0 -2px 6px rgba(167,139,250,0.2), 0 2px 6px rgba(167,139,250,0.2);
-    animation: beamScan 2.2s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, rgba(108,99,255,0.35), rgba(167,139,250,1), rgba(220,210,255,1), rgba(167,139,250,1), rgba(108,99,255,0.35), transparent);
+    box-shadow: 0 0 10px rgba(167,139,250,0.8), 0 0 22px rgba(108,99,255,0.4);
+    animation: beamScan 2s ease-in-out infinite;
   }
-  @keyframes beamScan { 0%{top:4%;opacity:0;} 8%{opacity:1;} 48%{top:93%;opacity:1;} 55%{top:93%;opacity:0;} 56%{top:4%;opacity:0;} 100%{top:93%;opacity:1;} }
-
-  /* ══ MAIN ANIMATION — NEURAL PULSE SYSTEM ══ */
-  .scan-anim { position:relative; z-index:5; width:180px; height:180px; flex-shrink:0; }
-
-  /* ── Radar sweep ── */
-  .so-radar {
-    position:absolute; inset:0; border-radius:50%;
-    border:1px solid rgba(108,99,255,0.15);
-    overflow:hidden;
-  }
-  .so-radar::before {
-    content:''; position:absolute;
-    top:50%; left:50%; width:50%; height:50%;
-    transform-origin:0% 100%;
-    background: conic-gradient(from 0deg, transparent 0deg, rgba(108,99,255,0.25) 30deg, rgba(167,139,250,0.5) 60deg, rgba(108,99,255,0.1) 80deg, transparent 90deg);
-    animation: radarSweep 2.5s linear infinite;
-    border-radius:0 100% 0 0;
-  }
-  @keyframes radarSweep { to { transform: rotate(360deg); } }
-
-  /* Radar tick rings */
-  .so-r0 { position:absolute; border-radius:50%; border:1px solid rgba(108,99,255,0.12); inset:0; }
-  .so-r1 { position:absolute; border-radius:50%; border:1px solid rgba(108,99,255,0.1); inset:28px; }
-  .so-r2 { position:absolute; border-radius:50%; border:1px solid rgba(108,99,255,0.08); inset:56px; }
-  .so-r3 { position:absolute; border-radius:50%; border:1px solid rgba(108,99,255,0.06); inset:84px; }
-
-  /* Cross-hair lines */
-  .so-crossh {
-    position:absolute; inset:0; pointer-events:none;
-  }
-  .so-crossh::before {
-    content:''; position:absolute; top:50%; left:0; right:0; height:1px;
-    background:linear-gradient(90deg, transparent, rgba(108,99,255,0.2), rgba(108,99,255,0.35), rgba(108,99,255,0.2), transparent);
-    transform:translateY(-50%);
-  }
-  .so-crossh::after {
-    content:''; position:absolute; left:50%; top:0; bottom:0; width:1px;
-    background:linear-gradient(180deg, transparent, rgba(108,99,255,0.2), rgba(108,99,255,0.35), rgba(108,99,255,0.2), transparent);
-    transform:translateX(-50%);
+  @keyframes beamScan {
+    0%   { top:4%;  opacity:0; }
+    8%   { opacity:1; }
+    46%  { top:93%; opacity:1; }
+    52%  { top:93%; opacity:0; }
+    53%  { top:4%;  opacity:0; }
+    100% { top:93%; opacity:1; }
   }
 
-  /* Blip dots — targets on radar */
-  .so-blip {
-    position:absolute; border-radius:50%;
-    background:var(--teal); box-shadow:0 0 6px var(--teal);
-    animation:blipPulse 2s ease-in-out infinite;
-  }
-  .so-blip:nth-child(1){width:4px;height:4px;top:22%;left:62%;animation-delay:0s;}
-  .so-blip:nth-child(2){width:3px;height:3px;top:58%;left:30%;animation-delay:0.6s;background:var(--gold);box-shadow:0 0 5px var(--gold);}
-  .so-blip:nth-child(3){width:5px;height:5px;top:70%;left:70%;animation-delay:1.2s;background:var(--accent2);box-shadow:0 0 7px var(--accent2);}
-  .so-blip:nth-child(4){width:3px;height:3px;top:35%;left:25%;animation-delay:1.8s;}
-  @keyframes blipPulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.3;transform:scale(0.5);} }
-
-  /* Center core — pulsing nucleus */
-  .so-core {
-    position:absolute; inset:78px; border-radius:50%;
-    background:radial-gradient(circle at 35% 35%, rgba(167,139,250,0.6), rgba(108,99,255,0.4), rgba(80,70,200,0.2));
-    border:1px solid rgba(167,139,250,0.5);
-    box-shadow: 0 0 12px rgba(108,99,255,0.5), 0 0 24px rgba(108,99,255,0.2), inset 0 0 10px rgba(167,139,250,0.2);
-    animation:corePulse 1.8s ease-in-out infinite;
-  }
-  @keyframes corePulse {
-    0%,100%{transform:scale(1);box-shadow:0 0 12px rgba(108,99,255,0.5),0 0 24px rgba(108,99,255,0.2),inset 0 0 10px rgba(167,139,250,0.2);}
-    50%{transform:scale(1.15);box-shadow:0 0 20px rgba(108,99,255,0.8),0 0 40px rgba(108,99,255,0.3),inset 0 0 16px rgba(167,139,250,0.35);}
+  /* ══════════════════════════════
+     MOLECULE ATOM RING ANIMATION
+  ══════════════════════════════ */
+  .scan-anim {
+    position: relative; z-index: 5;
+    width: 200px; height: 200px; flex-shrink: 0;
   }
 
-  /* Outer ripple ring */
-  .so-ripple {
-    position:absolute; inset:-8px; border-radius:50%;
-    border:1px solid rgba(108,99,255,0.25);
-    animation:rippleOut 3s ease-out infinite;
+  /* Nucleus glow */
+  .mol-nucleus {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 28px; height: 28px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #c4b5fd, #6c63ff, #4338ca);
+    box-shadow: 0 0 16px rgba(108,99,255,0.8), 0 0 32px rgba(108,99,255,0.4), 0 0 60px rgba(108,99,255,0.15);
+    animation: nucleusPulse 1.6s ease-in-out infinite;
   }
-  .so-ripple2 {
-    position:absolute; inset:-18px; border-radius:50%;
-    border:1px solid rgba(108,99,255,0.12);
-    animation:rippleOut 3s ease-out infinite 1s;
-  }
-  @keyframes rippleOut {
-    0%{opacity:0.8;transform:scale(0.95);}
-    100%{opacity:0;transform:scale(1.15);}
+  @keyframes nucleusPulse {
+    0%,100% { transform:translate(-50%,-50%) scale(1);   box-shadow: 0 0 16px rgba(108,99,255,0.8),0 0 32px rgba(108,99,255,0.4); }
+    50%     { transform:translate(-50%,-50%) scale(1.25); box-shadow: 0 0 28px rgba(108,99,255,1),  0 0 56px rgba(108,99,255,0.6); }
   }
 
-  /* ── BRAND & TEXT ── */
+  /* Electron orbit tracks */
+  .mol-orbit {
+    position: absolute;
+    top: 50%; left: 50%;
+    border-radius: 50%;
+    border: 1px solid rgba(108,99,255,0.15);
+    transform: translate(-50%, -50%);
+  }
+  .mol-orbit-1 { width:80px;  height:80px;  transform: translate(-50%,-50%) rotateX(70deg) rotateZ(0deg); }
+  .mol-orbit-2 { width:120px; height:120px; transform: translate(-50%,-50%) rotateX(70deg) rotateZ(60deg); }
+  .mol-orbit-3 { width:160px; height:160px; transform: translate(-50%,-50%) rotateX(70deg) rotateZ(120deg); }
+
+  /* Electrons on each orbit */
+  .mol-electron {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    top: -4px; left: 50%;
+    transform: translateX(-50%);
+  }
+  .mol-orbit-1 .mol-electron { background:#a78bfa; box-shadow:0 0 10px #a78bfa,0 0 20px rgba(167,139,250,0.5); animation: eOrbit 1.8s linear infinite; }
+  .mol-orbit-2 .mol-electron { background:#2dd4bf; box-shadow:0 0 10px #2dd4bf,0 0 20px rgba(45,212,191,0.5); animation: eOrbit 2.6s linear infinite; }
+  .mol-orbit-3 .mol-electron { background:#f5a623; box-shadow:0 0 10px #f5a623,0 0 20px rgba(245,166,35,0.5); animation: eOrbit 3.4s linear infinite; width:6px;height:6px;top:-3px; }
+  @keyframes eOrbit { from{transform:translateX(-50%) rotate(0deg) translateY(-40px) rotate(0deg);} to{transform:translateX(-50%) rotate(360deg) translateY(-40px) rotate(-360deg);} }
+
+  /* Orbit 1 electron */
+  .mol-orbit-1 .mol-electron { animation: eOrbit1 1.8s linear infinite; }
+  @keyframes eOrbit1 {
+    from { transform: translateX(-4px) translateY(-4px) rotate(0deg) translateX(40px); }
+    to   { transform: translateX(-4px) translateY(-4px) rotate(360deg) translateX(40px); }
+  }
+  /* Fix: each orbit track rotates itself, electron just orbits the parent */
+  .mol-orbit-1 { animation: orbitSpin1 1.8s linear infinite; }
+  .mol-orbit-2 { animation: orbitSpin2 2.6s linear infinite reverse; }
+  .mol-orbit-3 { animation: orbitSpin3 3.4s linear infinite; }
+  @keyframes orbitSpin1 { from{transform:translate(-50%,-50%) rotateX(75deg) rotateZ(20deg) rotate(0deg);}   to{transform:translate(-50%,-50%) rotateX(75deg) rotateZ(20deg) rotate(360deg);} }
+  @keyframes orbitSpin2 { from{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(80deg) rotate(0deg);}   to{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(80deg) rotate(360deg);} }
+  @keyframes orbitSpin3 { from{transform:translate(-50%,-50%) rotateX(80deg) rotateZ(140deg) rotate(0deg);} to{transform:translate(-50%,-50%) rotateX(80deg) rotateZ(140deg) rotate(360deg);} }
+
+  /* Counter-spin electrons so they stay upright */
+  .mol-orbit-1 .mol-electron { animation: eCount1 1.8s linear infinite; }
+  .mol-orbit-2 .mol-electron { animation: eCount2 2.6s linear infinite reverse; }
+  .mol-orbit-3 .mol-electron { animation: eCount3 3.4s linear infinite; }
+  @keyframes eCount1 { from{transform:translateX(-50%) rotate(0deg);}   to{transform:translateX(-50%) rotate(-360deg);} }
+  @keyframes eCount2 { from{transform:translateX(-50%) rotate(0deg);}   to{transform:translateX(-50%) rotate(360deg);} }
+  @keyframes eCount3 { from{transform:translateX(-50%) rotate(0deg);}   to{transform:translateX(-50%) rotate(-360deg);} }
+
+  /* Outer pulse ring */
+  .mol-ring-out {
+    position:absolute; top:50%; left:50%; border-radius:50%;
+    border: 1px solid rgba(108,99,255,0.2);
+    animation: molRingPulse 2.4s ease-out infinite;
+  }
+  .mol-ring-out:nth-child(1) { width:180px;height:180px; transform:translate(-50%,-50%); animation-delay:0s; }
+  .mol-ring-out:nth-child(2) { width:180px;height:180px; transform:translate(-50%,-50%); animation-delay:1.2s; }
+  @keyframes molRingPulse {
+    0%   { width:60px; height:60px; opacity:0.8; border-color:rgba(108,99,255,0.5); }
+    100% { width:210px; height:210px; opacity:0; border-color:rgba(108,99,255,0); }
+  }
+
+  /* ── BRAND ── */
   .so-brand { position:relative; z-index:5; text-align:center; }
-  .so-brand-name { font-family:'Playfair Display',serif; font-size:clamp(16px,3vw,20px); color:var(--text); letter-spacing:0.5px; display:block; }
-  .so-brand-sub { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); letter-spacing:3px; text-transform:uppercase; display:block; margin-top:3px; }
+  .so-brand-name { font-family:'Playfair Display',serif; font-size:clamp(16px,3vw,21px); color:var(--text); letter-spacing:0.3px; display:block; }
+  .so-brand-sub { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); letter-spacing:3px; text-transform:uppercase; display:block; margin-top:4px; }
 
   /* ── PROGRESS ── */
-  .so-prog { position:relative; z-index:5; width:clamp(220px,55vw,290px); }
-  .so-prog-top { display:flex; justify-content:space-between; margin-bottom:7px; }
-  .so-prog-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2); text-transform:uppercase; letter-spacing:2px; }
-  .so-prog-pct { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); }
-  .so-prog-track { height:2px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:hidden; position:relative; }
-  .so-prog-fill { height:100%; background:linear-gradient(90deg,#4f46e5,#6c63ff,#a78bfa,#f5a623); border-radius:99px; transition:width 0.35s ease; position:relative; }
-  .so-prog-fill::after { content:''; position:absolute; right:-2px; top:50%; transform:translateY(-50%); width:5px; height:5px; border-radius:50%; background:#ffd27a; box-shadow:0 0 8px var(--gold),0 0 16px rgba(245,166,35,0.4); }
+  .so-prog { position:relative; z-index:5; width:clamp(220px,55vw,300px); }
+  .so-prog-top { display:flex; justify-content:space-between; margin-bottom:8px; }
+  .so-prog-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; }
+  .so-prog-pct { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2); font-weight:600; }
+  .so-prog-track { height:2px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:visible; position:relative; }
+  .so-prog-fill {
+    height:100%; border-radius:99px; transition:width 0.4s ease;
+    background: linear-gradient(90deg, #4338ca, #6c63ff, #a78bfa, #2dd4bf);
+    box-shadow: 0 0 10px rgba(108,99,255,0.5);
+    position:relative;
+  }
+  .so-prog-fill::after {
+    content:''; position:absolute; right:-3px; top:50%; transform:translateY(-50%);
+    width:7px; height:7px; border-radius:50%; background:#fff;
+    box-shadow: 0 0 10px var(--accent2), 0 0 20px rgba(108,99,255,0.6);
+  }
 
   /* ── STEP LIST ── */
-  .so-steps { position:relative; z-index:5; display:flex; flex-direction:column; gap:5px; width:clamp(220px,55vw,290px); }
+  .so-steps { position:relative; z-index:5; display:flex; flex-direction:column; gap:5px; width:clamp(220px,55vw,300px); }
   .so-step {
-    display:flex; align-items:center; gap:10px; padding:7px 12px;
-    border-radius:9px; background:rgba(255,255,255,0.02);
+    display:flex; align-items:center; gap:10px; padding:8px 12px;
+    border-radius:9px; background:rgba(255,255,255,0.015);
     border:1px solid rgba(255,255,255,0.04);
-    font-size:11px; color:rgba(240,244,255,0.25); transition:all 0.4s;
+    font-size:11px; color:rgba(240,244,255,0.22); transition:all 0.45s;
     font-family:'JetBrains Mono',monospace; letter-spacing:0.3px;
   }
-  .so-step.active { background:rgba(108,99,255,0.1); border-color:rgba(108,99,255,0.25); color:var(--accent2); }
-  .so-step.done { background:rgba(45,212,191,0.05); border-color:rgba(45,212,191,0.18); color:var(--teal); }
+  .so-step.active { background:rgba(108,99,255,0.1); border-color:rgba(108,99,255,0.28); color:var(--accent2); box-shadow:0 0 14px rgba(108,99,255,0.08); }
+  .so-step.done   { background:rgba(45,212,191,0.05); border-color:rgba(45,212,191,0.2); color:var(--teal); }
   .so-step-ico { font-size:12px; flex-shrink:0; width:16px; text-align:center; }
 
-  /* ── DOT1 / DOT2 — not used in new anim, kept for compat ── */
-  .so-dot1,.so-dot2 { display:none; }
+  /* Mobile */
+  @media(max-width:480px){
+    .scan-anim { width:150px; height:150px; }
+    .mol-orbit-3 { width:120px; height:120px; }
+    .mol-orbit-2 { width:90px; height:90px; }
+    .mol-orbit-1 { width:60px; height:60px; }
+  }
 
-    @media (max-width: 768px) {
+      @media (max-width: 768px) {
     .header { height: 56px; }
     .brand-sub { display: none; }
     .step-bar { margin-top: 20px; }
@@ -1134,11 +1149,16 @@ export default function PrescriptionScanner() {
           )}
         </div>
 
-        {/* SCAN OVERLAY */}
+        {/* SCAN OVERLAY — MOLECULE ANIMATION */}
         {phase === "scanning" && (
           <div className={`scan-overlay${overlayExiting ? " exit" : ""}`}>
-            <div className="scan-particles" />
 
+            {/* floating particles */}
+            <div className="scan-particles">
+              {[...Array(10)].map((_,i) => <div key={i} className="sp" />)}
+            </div>
+
+            {/* prescription image with beam */}
             {image && (
               <div className="scan-frame">
                 <img src={image} alt="Scanning" />
@@ -1148,25 +1168,23 @@ export default function PrescriptionScanner() {
               </div>
             )}
 
+            {/* molecule atom animation */}
             <div className="scan-anim">
-              <div className="so-ripple2" />
-              <div className="so-ripple" />
-              <div className="so-radar">
-                <div className="so-blip" />
-                <div className="so-blip" />
-                <div className="so-blip" />
-                <div className="so-blip" />
-              </div>
-              <div className="so-r0" /><div className="so-r1" /><div className="so-r2" /><div className="so-r3" />
-              <div className="so-crossh" />
-              <div className="so-core" />
+              <div className="mol-ring-out" />
+              <div className="mol-ring-out" />
+              <div className="mol-orbit mol-orbit-1"><div className="mol-electron" /></div>
+              <div className="mol-orbit mol-orbit-2"><div className="mol-electron" /></div>
+              <div className="mol-orbit mol-orbit-3"><div className="mol-electron" /></div>
+              <div className="mol-nucleus" />
             </div>
 
+            {/* brand */}
             <div className="so-brand">
               <span className="so-brand-name">VaidyaDrishti AI</span>
               <span className="so-brand-sub">विश्लेषण · Analyzing</span>
             </div>
 
+            {/* progress bar */}
             <div className="so-prog">
               <div className="so-prog-top">
                 <span className="so-prog-lbl">Processing</span>
@@ -1177,6 +1195,7 @@ export default function PrescriptionScanner() {
               </div>
             </div>
 
+            {/* step list */}
             <div className="so-steps">
               {SCAN_STEPS.map((s, i) => (
                 <div key={i} className={"so-step" + (activeScanStep === i && !doneScanSteps.includes(i) ? " active" : "") + (doneScanSteps.includes(i) ? " done" : "")}>
