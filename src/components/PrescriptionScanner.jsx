@@ -419,195 +419,254 @@ const styles = `
   /* ── ERR BOX ── */
   .err-box { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 9px; align-items: flex-start; font-size: 13px; color: var(--red); line-height: 1.5; }
 
-  /* ══════════════════════════════════════════════
-     SCAN OVERLAY — VAIDYADRISHTI MOLECULE SCAN
-  ══════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════
+     SCAN OVERLAY — VAIDYADRISHTI NEXUS SCAN
+     DESIGN: Full-screen split — hex grid LEFT, terminal RIGHT
+  ══════════════════════════════════════════════════ */
   .scan-overlay {
-    position: fixed; inset: 0; z-index: 100;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: clamp(16px, 3vh, 28px);
-    background: #020510;
-    animation: soIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
-    overflow: hidden;
+    position: fixed; inset: 0; z-index: 100; overflow: hidden;
+    background: #010309;
+    animation: soIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
-  @keyframes soIn  { from { opacity:0; transform:scale(0.98); } to { opacity:1; transform:scale(1); } }
-  .scan-overlay.exit { animation: soOut 0.45s ease forwards; }
-  @keyframes soOut { to { opacity:0; } }
+  @keyframes soIn  { from{opacity:0;} to{opacity:1;} }
+  .scan-overlay.exit { animation: soOut 0.4s ease forwards; }
+  @keyframes soOut { to{opacity:0;} }
 
-  /* Void ambient */
+  /* ── GLOBAL SCAN BG ── */
   .scan-overlay::before {
     content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(ellipse 55% 55% at 50% 50%, rgba(108,99,255,0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 30% 40% at 20% 80%, rgba(45,212,191,0.04) 0%, transparent 50%),
-      radial-gradient(ellipse 25% 30% at 80% 20%, rgba(245,166,35,0.04) 0%, transparent 50%);
+      radial-gradient(ellipse 80% 60% at 25% 50%, rgba(108,99,255,0.07) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 80% at 75% 50%, rgba(45,212,191,0.04) 0%, transparent 55%);
+  }
+  /* vertical divider */
+  .scan-overlay::after {
+    content:''; position:absolute; top:10%; bottom:10%; left:50%; width:1px; z-index:2; pointer-events:none;
+    background: linear-gradient(180deg, transparent, rgba(108,99,255,0.3) 20%, rgba(108,99,255,0.5) 50%, rgba(108,99,255,0.3) 80%, transparent);
   }
 
-  /* ── FLOATING PARTICLES ── */
-  .scan-particles { position:absolute; inset:0; pointer-events:none; z-index:1; }
-  .sp {
-    position:absolute; border-radius:50%;
-    animation: spFloat linear infinite;
-  }
-  .sp:nth-child(1)  { width:2px;height:2px;background:rgba(167,139,250,0.7);left:10%;top:80%;animation-duration:12s;animation-delay:0s; }
-  .sp:nth-child(2)  { width:1px;height:1px;background:rgba(45,212,191,0.6);left:25%;top:70%;animation-duration:14s;animation-delay:-3s; }
-  .sp:nth-child(3)  { width:2px;height:2px;background:rgba(245,166,35,0.6);left:40%;top:90%;animation-duration:10s;animation-delay:-6s; }
-  .sp:nth-child(4)  { width:1px;height:1px;background:rgba(255,255,255,0.4);left:60%;top:85%;animation-duration:16s;animation-delay:-2s; }
-  .sp:nth-child(5)  { width:2px;height:2px;background:rgba(108,99,255,0.7);left:75%;top:75%;animation-duration:11s;animation-delay:-8s; }
-  .sp:nth-child(6)  { width:1px;height:1px;background:rgba(167,139,250,0.5);left:88%;top:90%;animation-duration:13s;animation-delay:-4s; }
-  .sp:nth-child(7)  { width:2px;height:2px;background:rgba(45,212,191,0.5);left:5%;top:60%;animation-duration:15s;animation-delay:-7s; }
-  .sp:nth-child(8)  { width:1px;height:1px;background:rgba(255,255,255,0.35);left:50%;top:95%;animation-duration:9s;animation-delay:-1s; }
-  .sp:nth-child(9)  { width:3px;height:3px;background:rgba(245,166,35,0.4);left:85%;top:50%;animation-duration:18s;animation-delay:-5s; }
-  .sp:nth-child(10) { width:1px;height:1px;background:rgba(108,99,255,0.5);left:15%;top:95%;animation-duration:12s;animation-delay:-9s; }
-  @keyframes spFloat {
-    0%   { transform: translateY(0)   translateX(0)   scale(1);   opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 0.6; }
-    100% { transform: translateY(-100vh) translateX(20px) scale(0); opacity: 0; }
+  /* ══════════════
+     LEFT PANEL
+  ══════════════ */
+  .so-left {
+    position: relative; z-index: 5;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 28px; padding: 40px 32px;
   }
 
-  /* ── SCAN IMAGE FRAME ── */
+  /* HEX GRID */
+  .so-hex-grid {
+    position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+    opacity: 0.35;
+  }
+  .so-hex-grid svg { width: 100%; height: 100%; }
+
+  /* Scan image */
   .scan-frame {
-    position:relative; z-index:5;
-    width: clamp(150px, 28vw, 220px);
-    border-radius:14px; overflow:hidden;
-    border: 1px solid rgba(108,99,255,0.3);
-    box-shadow: 0 0 30px rgba(108,99,255,0.18), 0 0 60px rgba(108,99,255,0.06);
+    position: relative; z-index: 5;
+    width: clamp(140px, 22vw, 200px);
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid rgba(108,99,255,0.35);
+    box-shadow: 0 0 0 4px rgba(108,99,255,0.06), 0 0 40px rgba(108,99,255,0.2);
   }
-  .scan-frame img { width:100%; max-height:150px; object-fit:contain; display:block; filter:brightness(0.3) saturate(0.3) hue-rotate(210deg); }
+  .scan-frame img {
+    width: 100%; max-height: 145px; object-fit: contain; display: block;
+    filter: brightness(0.28) saturate(0.25) hue-rotate(220deg);
+  }
   .scan-frame::after {
     content:''; position:absolute; inset:0; pointer-events:none;
-    background: linear-gradient(rgba(108,99,255,0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(108,99,255,0.06) 1px, transparent 1px);
-    background-size: 16px 16px;
+    background: linear-gradient(rgba(108,99,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(108,99,255,0.05) 1px, transparent 1px);
+    background-size: 14px 14px;
   }
-  .scan-corner { position:absolute; width:14px; height:14px; border-color:rgba(167,139,250,0.75); border-style:solid; }
-  .sc-tl{top:5px;left:5px;border-width:2px 0 0 2px;} .sc-tr{top:5px;right:5px;border-width:2px 2px 0 0;}
-  .sc-bl{bottom:5px;left:5px;border-width:0 0 2px 2px;} .sc-br{bottom:5px;right:5px;border-width:0 2px 2px 0;}
+  .scan-corner { position:absolute; width:13px; height:13px; border-style:solid; border-color: rgba(167,139,250,0.8); }
+  .sc-tl{top:5px;left:5px;border-width:2px 0 0 2px;}
+  .sc-tr{top:5px;right:5px;border-width:2px 2px 0 0;}
+  .sc-bl{bottom:5px;left:5px;border-width:0 0 2px 2px;}
+  .sc-br{bottom:5px;right:5px;border-width:0 2px 2px 0;}
   .scan-beam {
-    position:absolute; left:0; right:0; height:2px; z-index:2;
-    background: linear-gradient(90deg, transparent, rgba(108,99,255,0.35), rgba(167,139,250,1), rgba(220,210,255,1), rgba(167,139,250,1), rgba(108,99,255,0.35), transparent);
-    box-shadow: 0 0 10px rgba(167,139,250,0.8), 0 0 22px rgba(108,99,255,0.4);
-    animation: beamScan 2s ease-in-out infinite;
+    position:absolute; left:0; right:0; height:2px; z-index:3;
+    background: linear-gradient(90deg, transparent, rgba(108,99,255,0.3), rgba(167,139,250,1), rgba(230,220,255,1), rgba(167,139,250,1), rgba(108,99,255,0.3), transparent);
+    box-shadow: 0 0 12px rgba(167,139,250,0.9), 0 0 28px rgba(108,99,255,0.5);
+    animation: soBeam 1.8s ease-in-out infinite;
   }
-  @keyframes beamScan {
-    0%   { top:4%;  opacity:0; }
-    8%   { opacity:1; }
-    46%  { top:93%; opacity:1; }
-    52%  { top:93%; opacity:0; }
-    53%  { top:4%;  opacity:0; }
-    100% { top:93%; opacity:1; }
+  @keyframes soBeam {
+    0%  { top:4%;  opacity:0; }
+    8%  { opacity:1; }
+    45% { top:93%; opacity:1; }
+    51% { top:93%; opacity:0; }
+    52% { top:4%;  opacity:0; }
+    100%{ top:93%; opacity:1; }
   }
 
-  /* ══════════════════════════════
-     MOLECULE ATOM RING ANIMATION
-  ══════════════════════════════ */
-  .scan-anim {
+  /* CENTRAL RING DIAL */
+  .so-dial {
     position: relative; z-index: 5;
-    width: 200px; height: 200px; flex-shrink: 0;
+    width: 120px; height: 120px; flex-shrink: 0;
   }
-
-  /* Nucleus glow */
-  .mol-nucleus {
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 28px; height: 28px;
-    transform: translate(-50%, -50%);
+  /* outer ring: rotating dashes */
+  .so-dial-outer {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px dashed rgba(108,99,255,0.25);
+    animation: dialSpin 8s linear infinite;
+  }
+  /* mid ring: spinning arc */
+  .so-dial-mid {
+    position: absolute; inset: 12px; border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--accent2);
+    border-right-color: rgba(167,139,250,0.35);
+    animation: dialSpin 2s linear infinite;
+    filter: drop-shadow(0 0 4px var(--accent));
+  }
+  /* inner ring: reverse */
+  .so-dial-inner {
+    position: absolute; inset: 24px; border-radius: 50%;
+    border: 1.5px solid transparent;
+    border-top-color: var(--teal);
+    border-left-color: rgba(45,212,191,0.3);
+    animation: dialSpin 1.4s linear infinite reverse;
+    filter: drop-shadow(0 0 3px var(--teal));
+  }
+  @keyframes dialSpin { to { transform: rotate(360deg); } }
+  /* tick marks around dial */
+  .so-dial-tick {
+    position: absolute; top: 50%; left: 50%;
+    width: 3px; height: 8px;
+    background: rgba(108,99,255,0.5);
+    border-radius: 2px;
+    transform-origin: 0 0;
+  }
+  /* core center */
+  .so-dial-core {
+    position: absolute; inset: 44px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, rgba(167,139,250,0.7), rgba(108,99,255,0.5), rgba(67,56,202,0.3));
+    border: 1px solid rgba(167,139,250,0.4);
+    box-shadow: 0 0 16px rgba(108,99,255,0.6), inset 0 0 10px rgba(167,139,250,0.2);
+    animation: coreBeat 1.5s ease-in-out infinite;
+  }
+  @keyframes coreBeat {
+    0%,100%{ transform:scale(1);   box-shadow:0 0 16px rgba(108,99,255,0.6); }
+    50%    { transform:scale(1.2); box-shadow:0 0 28px rgba(108,99,255,0.9), 0 0 50px rgba(108,99,255,0.3); }
+  }
+  /* ripple from core */
+  .so-dial-ripple {
+    position: absolute; inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #c4b5fd, #6c63ff, #4338ca);
-    box-shadow: 0 0 16px rgba(108,99,255,0.8), 0 0 32px rgba(108,99,255,0.4), 0 0 60px rgba(108,99,255,0.15);
-    animation: nucleusPulse 1.6s ease-in-out infinite;
+    border: 1px solid rgba(108,99,255,0.3);
+    animation: dialRipple 2s ease-out infinite;
   }
-  @keyframes nucleusPulse {
-    0%,100% { transform:translate(-50%,-50%) scale(1);   box-shadow: 0 0 16px rgba(108,99,255,0.8),0 0 32px rgba(108,99,255,0.4); }
-    50%     { transform:translate(-50%,-50%) scale(1.25); box-shadow: 0 0 28px rgba(108,99,255,1),  0 0 56px rgba(108,99,255,0.6); }
-  }
-
-  /* Electron orbit tracks */
-  .mol-orbit {
-    position: absolute;
-    top: 50%; left: 50%;
-    border-radius: 50%;
-    border: 1px solid rgba(108,99,255,0.15);
-    transform: translate(-50%, -50%);
-  }
-  .mol-orbit-1 { width:80px;  height:80px;  transform: translate(-50%,-50%) rotateX(70deg) rotateZ(0deg); }
-  .mol-orbit-2 { width:120px; height:120px; transform: translate(-50%,-50%) rotateX(70deg) rotateZ(60deg); }
-  .mol-orbit-3 { width:160px; height:160px; transform: translate(-50%,-50%) rotateX(70deg) rotateZ(120deg); }
-
-  /* Electrons on each orbit */
-  .mol-electron {
-    position: absolute;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    top: -4px; left: 50%;
-    transform: translateX(-50%);
-  }
-  .mol-orbit-1 .mol-electron { background:#a78bfa; box-shadow:0 0 10px #a78bfa,0 0 20px rgba(167,139,250,0.5); animation: eOrbit 1.8s linear infinite; }
-  .mol-orbit-2 .mol-electron { background:#2dd4bf; box-shadow:0 0 10px #2dd4bf,0 0 20px rgba(45,212,191,0.5); animation: eOrbit 2.6s linear infinite; }
-  .mol-orbit-3 .mol-electron { background:#f5a623; box-shadow:0 0 10px #f5a623,0 0 20px rgba(245,166,35,0.5); animation: eOrbit 3.4s linear infinite; width:6px;height:6px;top:-3px; }
-  @keyframes eOrbit { from{transform:translateX(-50%) rotate(0deg) translateY(-40px) rotate(0deg);} to{transform:translateX(-50%) rotate(360deg) translateY(-40px) rotate(-360deg);} }
-
-  /* Orbit 1 electron */
-  .mol-orbit-1 .mol-electron { animation: eOrbit1 1.8s linear infinite; }
-  @keyframes eOrbit1 {
-    from { transform: translateX(-4px) translateY(-4px) rotate(0deg) translateX(40px); }
-    to   { transform: translateX(-4px) translateY(-4px) rotate(360deg) translateX(40px); }
-  }
-  /* Fix: each orbit track rotates itself, electron just orbits the parent */
-  .mol-orbit-1 { animation: orbitSpin1 1.8s linear infinite; }
-  .mol-orbit-2 { animation: orbitSpin2 2.6s linear infinite reverse; }
-  .mol-orbit-3 { animation: orbitSpin3 3.4s linear infinite; }
-  @keyframes orbitSpin1 { from{transform:translate(-50%,-50%) rotateX(75deg) rotateZ(20deg) rotate(0deg);}   to{transform:translate(-50%,-50%) rotateX(75deg) rotateZ(20deg) rotate(360deg);} }
-  @keyframes orbitSpin2 { from{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(80deg) rotate(0deg);}   to{transform:translate(-50%,-50%) rotateX(60deg) rotateZ(80deg) rotate(360deg);} }
-  @keyframes orbitSpin3 { from{transform:translate(-50%,-50%) rotateX(80deg) rotateZ(140deg) rotate(0deg);} to{transform:translate(-50%,-50%) rotateX(80deg) rotateZ(140deg) rotate(360deg);} }
-
-  /* Counter-spin electrons so they stay upright */
-  .mol-orbit-1 .mol-electron { animation: eCount1 1.8s linear infinite; }
-  .mol-orbit-2 .mol-electron { animation: eCount2 2.6s linear infinite reverse; }
-  .mol-orbit-3 .mol-electron { animation: eCount3 3.4s linear infinite; }
-  @keyframes eCount1 { from{transform:translateX(-50%) rotate(0deg);}   to{transform:translateX(-50%) rotate(-360deg);} }
-  @keyframes eCount2 { from{transform:translateX(-50%) rotate(0deg);}   to{transform:translateX(-50%) rotate(360deg);} }
-  @keyframes eCount3 { from{transform:translateX(-50%) rotate(0deg);}   to{transform:translateX(-50%) rotate(-360deg);} }
-
-  /* Outer pulse ring */
-  .mol-ring-out {
-    position:absolute; top:50%; left:50%; border-radius:50%;
-    border: 1px solid rgba(108,99,255,0.2);
-    animation: molRingPulse 2.4s ease-out infinite;
-  }
-  .mol-ring-out:nth-child(1) { width:180px;height:180px; transform:translate(-50%,-50%); animation-delay:0s; }
-  .mol-ring-out:nth-child(2) { width:180px;height:180px; transform:translate(-50%,-50%); animation-delay:1.2s; }
-  @keyframes molRingPulse {
-    0%   { width:60px; height:60px; opacity:0.8; border-color:rgba(108,99,255,0.5); }
-    100% { width:210px; height:210px; opacity:0; border-color:rgba(108,99,255,0); }
+  .so-dial-ripple:nth-child(8) { animation-delay: 1s; }
+  @keyframes dialRipple {
+    0%   { inset: 44px; opacity: 0.8; border-color: rgba(108,99,255,0.5); }
+    100% { inset: -10px; opacity: 0; border-color: rgba(108,99,255,0); }
   }
 
-  /* ── BRAND ── */
+  /* Brand under dial */
   .so-brand { position:relative; z-index:5; text-align:center; }
-  .so-brand-name { font-family:'Playfair Display',serif; font-size:clamp(16px,3vw,21px); color:var(--text); letter-spacing:0.3px; display:block; }
-  .so-brand-sub { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); letter-spacing:3px; text-transform:uppercase; display:block; margin-top:4px; }
+  .so-brand-name {
+    font-family:'Playfair Display',serif; font-size: clamp(15px,2.5vw,20px);
+    color:var(--text); letter-spacing:0.3px; display:block;
+  }
+  .so-brand-sub {
+    font-family:'JetBrains Mono',monospace; font-size:9px;
+    color:var(--text-faint); letter-spacing:3px; text-transform:uppercase;
+    display:block; margin-top:4px;
+  }
 
-  /* ── PROGRESS ── */
-  .so-prog { position:relative; z-index:5; width:clamp(220px,55vw,300px); }
+  /* ══════════════
+     RIGHT PANEL
+  ══════════════ */
+  .so-right {
+    position: relative; z-index: 5;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 20px; padding: 40px 32px;
+  }
+
+  /* TERMINAL LOG WINDOW */
+  .so-terminal {
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(108,99,255,0.2);
+    border-radius: 12px; overflow: hidden;
+    flex: 1; max-height: 260px;
+  }
+  .so-terminal-bar {
+    padding: 8px 14px;
+    background: rgba(108,99,255,0.08);
+    border-bottom: 1px solid rgba(108,99,255,0.15);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .so-term-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .so-term-dot:nth-child(1) { background: rgba(248,113,113,0.7); }
+  .so-term-dot:nth-child(2) { background: rgba(245,166,35,0.7); }
+  .so-term-dot:nth-child(3) { background: rgba(45,212,191,0.7); }
+  .so-term-title {
+    font-family:'JetBrains Mono',monospace; font-size:10px;
+    color: var(--text-faint); letter-spacing: 1px; margin-left: 4px;
+  }
+  .so-terminal-body {
+    padding: 12px 14px;
+    font-family:'JetBrains Mono',monospace; font-size:10.5px;
+    line-height: 1.8; overflow: hidden;
+  }
+  .so-log-line {
+    display: flex; align-items: baseline; gap: 8px;
+    opacity: 0; animation: logAppear 0.4s ease forwards;
+  }
+  .so-log-line:nth-child(1)  { animation-delay: 0.1s; }
+  .so-log-line:nth-child(2)  { animation-delay: 0.7s; }
+  .so-log-line:nth-child(3)  { animation-delay: 1.4s; }
+  .so-log-line:nth-child(4)  { animation-delay: 2.1s; }
+  .so-log-line:nth-child(5)  { animation-delay: 2.8s; }
+  .so-log-line:nth-child(6)  { animation-delay: 3.5s; }
+  .so-log-line:nth-child(7)  { animation-delay: 4.2s; }
+  @keyframes logAppear {
+    from { opacity:0; transform: translateX(-6px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+  .so-log-ts { color: rgba(108,99,255,0.55); font-size: 9px; white-space:nowrap; }
+  .so-log-ok  { color: var(--teal); }
+  .so-log-run { color: var(--gold); }
+  .so-log-inf { color: rgba(167,139,250,0.8); }
+  .so-log-txt { color: rgba(240,244,255,0.55); }
+  /* blinking cursor */
+  .so-cursor {
+    display:inline-block; width:7px; height:12px;
+    background: var(--accent2); border-radius:1px; margin-left:2px;
+    vertical-align:middle;
+    animation: cursorBlink 1s step-end infinite;
+  }
+  @keyframes cursorBlink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+  /* PROGRESS */
+  .so-prog { }
   .so-prog-top { display:flex; justify-content:space-between; margin-bottom:8px; }
-  .so-prog-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; }
-  .so-prog-pct { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2); font-weight:600; }
-  .so-prog-track { height:2px; background:rgba(255,255,255,0.05); border-radius:99px; overflow:visible; position:relative; }
+  .so-prog-lbl { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; }
+  .so-prog-pct { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent2); font-weight:700; }
+  .so-prog-track {
+    height: 3px; background: rgba(255,255,255,0.04); border-radius:99px;
+    overflow: visible; position: relative;
+  }
   .so-prog-fill {
-    height:100%; border-radius:99px; transition:width 0.4s ease;
+    height: 100%; border-radius: 99px; transition: width 0.4s ease;
     background: linear-gradient(90deg, #4338ca, #6c63ff, #a78bfa, #2dd4bf);
-    box-shadow: 0 0 10px rgba(108,99,255,0.5);
-    position:relative;
+    box-shadow: 0 0 8px rgba(108,99,255,0.6);
+    position: relative;
   }
   .so-prog-fill::after {
-    content:''; position:absolute; right:-3px; top:50%; transform:translateY(-50%);
-    width:7px; height:7px; border-radius:50%; background:#fff;
-    box-shadow: 0 0 10px var(--accent2), 0 0 20px rgba(108,99,255,0.6);
+    content:''; position:absolute; right:-4px; top:50%;
+    transform: translateY(-50%);
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 12px var(--accent2), 0 0 24px rgba(108,99,255,0.7);
   }
 
-  /* ── STEP LIST ── */
-  .so-steps { position:relative; z-index:5; display:flex; flex-direction:column; gap:5px; width:clamp(220px,55vw,300px); }
+  /* STEP LIST */
+  .so-steps { display:flex; flex-direction:column; gap:5px; }
   .so-step {
     display:flex; align-items:center; gap:10px; padding:8px 12px;
     border-radius:9px; background:rgba(255,255,255,0.015);
@@ -615,19 +674,57 @@ const styles = `
     font-size:11px; color:rgba(240,244,255,0.22); transition:all 0.45s;
     font-family:'JetBrains Mono',monospace; letter-spacing:0.3px;
   }
-  .so-step.active { background:rgba(108,99,255,0.1); border-color:rgba(108,99,255,0.28); color:var(--accent2); box-shadow:0 0 14px rgba(108,99,255,0.08); }
-  .so-step.done   { background:rgba(45,212,191,0.05); border-color:rgba(45,212,191,0.2); color:var(--teal); }
+  .so-step.active {
+    background:rgba(108,99,255,0.1); border-color:rgba(108,99,255,0.3);
+    color:var(--accent2); box-shadow:0 0 14px rgba(108,99,255,0.1);
+  }
+  .so-step.done { background:rgba(45,212,191,0.05); border-color:rgba(45,212,191,0.2); color:var(--teal); }
   .so-step-ico { font-size:12px; flex-shrink:0; width:16px; text-align:center; }
 
-  /* Mobile */
-  @media(max-width:480px){
-    .scan-anim { width:150px; height:150px; }
-    .mol-orbit-3 { width:120px; height:120px; }
-    .mol-orbit-2 { width:90px; height:90px; }
-    .mol-orbit-1 { width:60px; height:60px; }
+  /* ── FLOATING PARTICLES (full overlay) ── */
+  .scan-particles { position:absolute; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+  .sp {
+    position: absolute; border-radius:50%;
+    animation: spFloat linear infinite;
+  }
+  .sp:nth-child(1)  { width:2px;height:2px;background:rgba(167,139,250,0.6);left:8%;top:85%;animation-duration:14s;animation-delay:0s; }
+  .sp:nth-child(2)  { width:1px;height:1px;background:rgba(45,212,191,0.5);left:22%;top:75%;animation-duration:18s;animation-delay:-4s; }
+  .sp:nth-child(3)  { width:2px;height:2px;background:rgba(245,166,35,0.5);left:38%;top:92%;animation-duration:11s;animation-delay:-7s; }
+  .sp:nth-child(4)  { width:1px;height:1px;background:rgba(255,255,255,0.35);left:55%;top:88%;animation-duration:16s;animation-delay:-2s; }
+  .sp:nth-child(5)  { width:2px;height:2px;background:rgba(108,99,255,0.6);left:70%;top:80%;animation-duration:13s;animation-delay:-9s; }
+  .sp:nth-child(6)  { width:1px;height:1px;background:rgba(167,139,250,0.4);left:84%;top:93%;animation-duration:15s;animation-delay:-5s; }
+  .sp:nth-child(7)  { width:3px;height:3px;background:rgba(45,212,191,0.4);left:92%;top:70%;animation-duration:20s;animation-delay:-3s; }
+  .sp:nth-child(8)  { width:1px;height:1px;background:rgba(245,166,35,0.5);left:47%;top:97%;animation-duration:10s;animation-delay:-1s; }
+  @keyframes spFloat {
+    0%   { transform:translateY(0) translateX(0); opacity:0; }
+    8%   { opacity:0.9; }
+    92%  { opacity:0.5; }
+    100% { transform:translateY(-100vh) translateX(15px); opacity:0; }
   }
 
-      @media (max-width: 768px) {
+  /* ── SCAN ANIM — hidden legacy ── */
+  .scan-anim { display:none; }
+  /* mol-* legacy compat */
+  .mol-nucleus,.mol-orbit,.mol-electron,.mol-ring-out { display:none; }
+
+  /* ── RESPONSIVE: stack vertically on mobile ── */
+  @media (max-width: 640px) {
+    .scan-overlay {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+    .scan-overlay::after { display: none; }
+    .so-left { padding: 20px 20px 12px; gap: 16px; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    .so-right { padding: 12px 20px 20px; gap: 14px; }
+    .scan-frame { width: clamp(100px, 40vw, 150px); }
+    .so-dial { width: 80px; height: 80px; }
+    .so-dial-core { inset: 30px; }
+    .so-terminal { max-height: 140px; }
+    .so-brand-name { font-size: 14px; }
+  }
+  
+  @keyframes hexFade { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
+        @media (max-width: 768px) {
     .header { height: 56px; }
     .brand-sub { display: none; }
     .step-bar { margin-top: 20px; }
@@ -1149,60 +1246,111 @@ export default function PrescriptionScanner() {
           )}
         </div>
 
-        {/* SCAN OVERLAY — MOLECULE ANIMATION */}
+        {/* SCAN OVERLAY — NEXUS SPLIT PANEL */}
         {phase === "scanning" && (
           <div className={`scan-overlay${overlayExiting ? " exit" : ""}`}>
 
-            {/* floating particles */}
+            {/* particles */}
             <div className="scan-particles">
-              {[...Array(10)].map((_,i) => <div key={i} className="sp" />)}
+              {[...Array(8)].map((_,i) => <div key={i} className="sp" />)}
             </div>
 
-            {/* prescription image with beam */}
-            {image && (
-              <div className="scan-frame">
-                <img src={image} alt="Scanning" />
-                <div className="scan-beam" />
-                <div className="scan-corner sc-tl" /><div className="scan-corner sc-tr" />
-                <div className="scan-corner sc-bl" /><div className="scan-corner sc-br" />
+            {/* ── LEFT PANEL ── */}
+            <div className="so-left">
+
+              {/* hex grid bg */}
+              <div className="so-hex-grid">
+                <svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="hexPat" x="0" y="0" width="52" height="60" patternUnits="userSpaceOnUse">
+                      <polygon points="26,2 50,15 50,45 26,58 2,45 2,15" fill="none" stroke="rgba(108,99,255,0.2)" strokeWidth="0.8"/>
+                    </pattern>
+                  </defs>
+                  <rect width="400" height="600" fill="url(#hexPat)"/>
+                  {/* animated highlight hexes */}
+                  {[[52,30],[156,30],[260,30],[104,90],[208,90],[52,150],[312,90],[156,150],[260,150],[104,210],[208,210],[52,270],[312,210],[26,330],[130,330],[234,330],[338,330]].map(([x,y],i)=>(
+                    <polygon key={i} points={`${x+24},${y} ${x+48},${y+13} ${x+48},${y+43} ${x+24},${y+56} ${x},${y+43} ${x},${y+13}`}
+                      fill={`rgba(108,99,255,${0.03 + (i%4)*0.02})`} stroke="none"
+                      style={{animation:`hexFade ${2+(i%3)*0.7}s ease-in-out infinite`,animationDelay:`${i*0.2}s`}}
+                    />
+                  ))}
+                </svg>
               </div>
-            )}
 
-            {/* molecule atom animation */}
-            <div className="scan-anim">
-              <div className="mol-ring-out" />
-              <div className="mol-ring-out" />
-              <div className="mol-orbit mol-orbit-1"><div className="mol-electron" /></div>
-              <div className="mol-orbit mol-orbit-2"><div className="mol-electron" /></div>
-              <div className="mol-orbit mol-orbit-3"><div className="mol-electron" /></div>
-              <div className="mol-nucleus" />
-            </div>
-
-            {/* brand */}
-            <div className="so-brand">
-              <span className="so-brand-name">VaidyaDrishti AI</span>
-              <span className="so-brand-sub">विश्लेषण · Analyzing</span>
-            </div>
-
-            {/* progress bar */}
-            <div className="so-prog">
-              <div className="so-prog-top">
-                <span className="so-prog-lbl">Processing</span>
-                <span className="so-prog-pct">{scanProgress}%</span>
-              </div>
-              <div className="so-prog-track">
-                <div className="so-prog-fill" style={{width: scanProgress + "%"}} />
-              </div>
-            </div>
-
-            {/* step list */}
-            <div className="so-steps">
-              {SCAN_STEPS.map((s, i) => (
-                <div key={i} className={"so-step" + (activeScanStep === i && !doneScanSteps.includes(i) ? " active" : "") + (doneScanSteps.includes(i) ? " done" : "")}>
-                  <span className="so-step-ico">{doneScanSteps.includes(i) ? "✓" : activeScanStep === i ? s.icon : "○"}</span>
-                  {s.label}
+              {/* scan image */}
+              {image && (
+                <div className="scan-frame">
+                  <img src={image} alt="Scanning" />
+                  <div className="scan-beam" />
+                  <div className="scan-corner sc-tl" /><div className="scan-corner sc-tr" />
+                  <div className="scan-corner sc-bl" /><div className="scan-corner sc-br" />
                 </div>
-              ))}
+              )}
+
+              {/* dial */}
+              <div className="so-dial">
+                <div className="so-dial-ripple" />
+                <div className="so-dial-ripple" style={{animationDelay:"1s"}} />
+                <div className="so-dial-outer" />
+                <div className="so-dial-mid" />
+                <div className="so-dial-inner" />
+                {[...Array(12)].map((_,i) => (
+                  <div key={i} className="so-dial-tick" style={{
+                    transform:`translate(-50%, -50%) rotate(${i*30}deg) translateY(-52px)`,
+                    opacity: i%3===0 ? 0.8 : 0.3,
+                    height: i%3===0 ? "10px" : "6px"
+                  }} />
+                ))}
+                <div className="so-dial-core" />
+              </div>
+
+              {/* brand */}
+              <div className="so-brand">
+                <span className="so-brand-name">VaidyaDrishti AI</span>
+                <span className="so-brand-sub">विश्लेषण · Analyzing</span>
+              </div>
+            </div>
+
+            {/* ── RIGHT PANEL ── */}
+            <div className="so-right">
+
+              {/* terminal log */}
+              <div className="so-terminal">
+                <div className="so-terminal-bar">
+                  <div className="so-term-dot" /><div className="so-term-dot" /><div className="so-term-dot" />
+                  <span className="so-term-title">vaidyadrishti — scan.log</span>
+                </div>
+                <div className="so-terminal-body">
+                  <div className="so-log-line"><span className="so-log-ts">[00:00]</span><span className="so-log-ok">✓ INIT</span><span className="so-log-txt">Vision engine loaded</span></div>
+                  <div className="so-log-line"><span className="so-log-ts">[00:01]</span><span className="so-log-run">⟳ PROC</span><span className="so-log-txt">Decoding image buffer</span></div>
+                  <div className="so-log-line"><span className="so-log-ts">[00:02]</span><span className="so-log-inf">◈ INFO</span><span className="so-log-txt">Groq API — model ready</span></div>
+                  <div className="so-log-line"><span className="so-log-ts">[00:03]</span><span className="so-log-run">⟳ SCAN</span><span className="so-log-txt">Extracting text regions</span></div>
+                  <div className="so-log-line"><span className="so-log-ts">[00:04]</span><span className="so-log-run">⟳ ANLY</span><span className="so-log-txt">Parsing medication names</span></div>
+                  <div className="so-log-line"><span className="so-log-ts">[00:05]</span><span className="so-log-ok">✓ DONE</span><span className="so-log-txt">Dosage patterns matched</span></div>
+                  <div className="so-log-line"><span className="so-log-ts">[00:06]</span><span className="so-log-inf">◈ OUT&nbsp;</span><span className="so-log-txt">Compiling results<span className="so-cursor" /></span></div>
+                </div>
+              </div>
+
+              {/* progress */}
+              <div className="so-prog">
+                <div className="so-prog-top">
+                  <span className="so-prog-lbl">Analysis</span>
+                  <span className="so-prog-pct">{scanProgress}%</span>
+                </div>
+                <div className="so-prog-track">
+                  <div className="so-prog-fill" style={{width: scanProgress + "%"}} />
+                </div>
+              </div>
+
+              {/* steps */}
+              <div className="so-steps">
+                {SCAN_STEPS.map((s, i) => (
+                  <div key={i} className={"so-step" + (activeScanStep === i && !doneScanSteps.includes(i) ? " active" : "") + (doneScanSteps.includes(i) ? " done" : "")}>
+                    <span className="so-step-ico">{doneScanSteps.includes(i) ? "✓" : activeScanStep === i ? s.icon : "○"}</span>
+                    {s.label}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
