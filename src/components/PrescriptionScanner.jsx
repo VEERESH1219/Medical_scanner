@@ -148,6 +148,31 @@ const styles = `
   .history-patient{font-size:13px;font-weight:600;color:var(--text);}
   .history-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-faint);}
   .history-badge{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;background:var(--cyan-soft);border:1px solid rgba(6,182,212,0.2);border-radius:99px;color:var(--cyan);white-space:nowrap;}
+
+  /* ── SEARCH LINK BUTTON ── */
+  .btn-search{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid rgba(59,130,246,0.25);border-radius:7px;background:rgba(59,130,246,0.07);color:rgba(147,197,253,0.85);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;text-decoration:none;transition:all 0.2s;margin-left:8px;}
+  .btn-search:hover{background:rgba(59,130,246,0.18);border-color:rgba(59,130,246,0.45);}
+  .mc-name-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+  /* ── SCHEDULE ── */
+  .schedule-box{background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(6,182,212,0.03));border:1px solid rgba(59,130,246,0.15);border-radius:14px;padding:14px 16px;}
+  .schedule-hdr{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.8px;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .schedule-hdr::after{content:'';flex:1;height:1px;background:rgba(59,130,246,0.15);}
+  .schedule-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  @media(max-width:600px){.schedule-grid{grid-template-columns:1fr;}}
+  .schedule-slot{border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);padding:10px 12px;}
+  .slot-time{font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);margin-bottom:6px;}
+  .slot-meds{display:flex;flex-direction:column;gap:4px;}
+  .slot-med{font-size:12px;color:var(--text-dim);display:flex;align-items:baseline;gap:6px;}
+  .slot-dose{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--cyan);flex-shrink:0;}
+  /* ── TRANSLATE ── */
+  .translate-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .btn-translate{display:flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid rgba(16,185,129,0.25);border-radius:10px;background:rgba(16,185,129,0.07);color:var(--emerald);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+  .btn-translate:hover{background:rgba(16,185,129,0.15);}
+  .btn-translate:disabled{opacity:0.4;cursor:not-allowed;}
+  .lang-select{padding:8px 12px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;background:rgba(255,255,255,0.04);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;cursor:pointer;}
+  .translated-box{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.15);border-radius:14px;padding:14px 16px;}
+  .translated-hdr{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.8px;color:var(--emerald);margin-bottom:8px;}
+  .translated-text{font-size:13px;color:var(--text-dim);line-height:1.7;white-space:pre-wrap;}
 `;
 
 const SCAN_STEPS = [
@@ -174,6 +199,9 @@ export default function PrescriptionScanner() {
   const [uploadExiting, setUploadExiting] = useState(false);
   const [history, setHistory] = useState(() => { try { return JSON.parse(localStorage.getItem("rxscanner_history") || "[]"); } catch(e) { return []; } });
   const [copiedId, setCopiedId] = useState(null);
+  const [lang, setLang] = useState("te");
+  const [translating, setTranslating] = useState(false);
+  const [translated, setTranslated] = useState(null);
 
   const handleFile = useCallback((file) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -255,7 +283,7 @@ export default function PrescriptionScanner() {
   const resetAll = () => {
     setPhase("upload"); setImage(null); setImageBase64(null);
     setResult(null); setError(null); setScanProgress(0);
-    setActiveScanStep(0); setDoneScanSteps([]); setUploadExiting(false);
+    setActiveScanStep(0); setDoneScanSteps([]); setUploadExiting(false); setTranslated(null);
   };
 
   const saveToHistory = (data) => {
@@ -315,6 +343,58 @@ export default function PrescriptionScanner() {
     const a = document.createElement("a");
     a.href = url; a.download = "prescription_" + Date.now() + ".txt";
     a.click(); URL.revokeObjectURL(url);
+  };
+
+  const buildSchedule = (medications) => {
+    const slots = { Morning: [], Afternoon: [], Night: [] };
+    (medications || []).forEach(med => {
+      if (!notNull(med.name)) return;
+      const freq = (med.frequency || "").toLowerCase();
+      const dose = notNull(med.dosage) ? med.dosage : "";
+      const entry = { name: med.name, dose };
+      if (freq.includes("once") || freq.includes("1")) {
+        slots.Morning.push(entry);
+      } else if (freq.includes("twice") || freq.includes("2")) {
+        slots.Morning.push(entry); slots.Night.push(entry);
+      } else if (freq.includes("three") || freq.includes("3") || freq.includes("thrice")) {
+        slots.Morning.push(entry); slots.Afternoon.push(entry); slots.Night.push(entry);
+      } else {
+        slots.Morning.push(entry);
+      }
+    });
+    return slots;
+  };
+
+  const translateResult = async () => {
+    if (!result || !apiKey) return;
+    setTranslating(true); setTranslated(null);
+    try {
+      const summary = "Patient: " + (result.patientName || "N/A") + "\n" +
+        "Doctor: " + (result.doctorName || "N/A") + "\n" +
+        "Date: " + (result.date || "N/A") + "\n" +
+        (notNull(result.generalNotes) ? "Notes: " + result.generalNotes + "\n" : "") +
+        "Medications:\n" +
+        (result.medications || []).map((m, i) =>
+          (i+1) + ". " + m.name + (notNull(m.dosage) ? " " + m.dosage : "") +
+          (notNull(m.frequency) ? ", " + m.frequency : "") +
+          (notNull(m.duration) ? ", for " + m.duration : "") +
+          (notNull(m.instructions) ? " (" + m.instructions + ")" : "") +
+          "\n   About: " + (m.description || "")
+        ).join("\n");
+      const langNames = { te: "Telugu", hi: "Hindi", ta: "Tamil", bn: "Bengali", mr: "Marathi" };
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+        body: JSON.stringify({
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
+          max_tokens: 1500,
+          messages: [{ role: "user", content: "Translate the following medical prescription summary to " + langNames[lang] + ". Keep medicine names in English. Be clear and simple for the patient to understand:\n\n" + summary }]
+        })
+      });
+      const data = await res.json();
+      if (data.choices) setTranslated(data.choices[0].message.content);
+    } catch(e) { setTranslated("Translation failed. Please try again."); }
+    setTranslating(false);
   };
 
   const medCount = result?.medications?.length || 0;
@@ -457,7 +537,11 @@ export default function PrescriptionScanner() {
                       ? result.medications.map((med, i) => (
                         <div className="med-card" key={i}>
                           <div className="mc-top">
-                            <div className="mc-name">{med.name}</div>
+                            <div className="mc-name-row">
+                              <span className="mc-name">{med.name}</span>
+                              <a className="btn-search" href={"https://www.1mg.com/search/all?name=" + encodeURIComponent(med.name)} target="_blank" rel="noreferrer">1mg 🔗</a>
+                              <a className="btn-search" href={"https://www.netmeds.com/catalogsearch/result?q=" + encodeURIComponent(med.name)} target="_blank" rel="noreferrer">Netmeds 🔗</a>
+                            </div>
                             {notNull(med.dosage) && <div className="mc-badge">{med.dosage}</div>}
                           </div>
                           <button className={"btn-copy" + (copiedId === i ? " copied" : "")} onClick={() => copyMed(med, i)}>{copiedId === i ? "✓ Copied" : "📋 Copy"}</button>
@@ -479,6 +563,51 @@ export default function PrescriptionScanner() {
                       : <div className="err-box"><span>⚠️</span><span>No medications could be extracted.</span></div>
                     }
                   </>
+                )}
+                {result && result.medications && result.medications.length > 0 && (
+                  <div className="schedule-box">
+                    <div className="schedule-hdr">🕐 Daily Schedule</div>
+                    <div className="schedule-grid">
+                      {Object.entries(buildSchedule(result.medications)).map(([slot, meds]) => (
+                        <div className="schedule-slot" key={slot}>
+                          <div className="slot-time">{slot === "Morning" ? "🌅 Morning" : slot === "Afternoon" ? "☀️ Afternoon" : "🌙 Night"}</div>
+                          <div className="slot-meds">
+                            {meds.length === 0
+                              ? <span style={{fontSize:"11px",color:"var(--text-faint)"}}>—</span>
+                              : meds.map((m, i) => (
+                                <div className="slot-med" key={i}>
+                                  <span className="slot-dose">{m.dose || "•"}</span>
+                                  <span>{m.name}</span>
+                                </div>
+                              ))
+                            }
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {result && (
+                  <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+                    <div className="translate-row">
+                      <select className="lang-select" value={lang} onChange={e => { setLang(e.target.value); setTranslated(null); }}>
+                        <option value="te">Telugu</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ta">Tamil</option>
+                        <option value="bn">Bengali</option>
+                        <option value="mr">Marathi</option>
+                      </select>
+                      <button className="btn-translate" onClick={translateResult} disabled={translating}>
+                        {translating ? "⏳ Translating..." : "🌐 Translate"}
+                      </button>
+                    </div>
+                    {translated && (
+                      <div className="translated-box">
+                        <div className="translated-hdr">🌐 Translated Summary</div>
+                        <div className="translated-text">{translated}</div>
+                      </div>
+                    )}
+                  </div>
                 )}
                 <button className="btn-rescan" onClick={resetAll}>↩ Scan Another Prescription</button>
               </div>
