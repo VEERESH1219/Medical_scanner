@@ -1,555 +1,644 @@
 import { useState, useCallback, useEffect } from "react";
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── CLAY + GLASS ROOT TOKENS ── */
   :root {
-    --bg: #f5f0ff;
-    --clay-shadow: 8px 16px 40px rgba(79,38,130,0.16), 2px 4px 12px rgba(79,38,130,0.10), inset 0 1px 0 rgba(255,255,255,0.88);
-    --clay-shadow-sm: 4px 8px 20px rgba(79,38,130,0.12), 1px 2px 6px rgba(79,38,130,0.08), inset 0 1px 0 rgba(255,255,255,0.82);
-    --clay-shadow-hover: 10px 20px 50px rgba(79,38,130,0.2), 3px 6px 16px rgba(79,38,130,0.12), inset 0 1px 0 rgba(255,255,255,0.92);
-    --glass-bg: rgba(255,255,255,0.45);
-    --glass-border: rgba(255,255,255,0.75);
-    --glass-shadow: 0 8px 32px rgba(79,38,130,0.1), inset 0 1px 0 rgba(255,255,255,0.92), inset 0 -1px 0 rgba(79,38,130,0.05);
-    --indigo: #4f2682;
-    --indigo-mid: #7b4fc9;
-    --indigo-light: #a67fe8;
-    --saffron: #e07b00;
-    --saffron-light: #f5a623;
-    --gold: #c9952a;
-    --teal: #1a8a7a;
-    --red: #c0392b;
-    --text: #1a0e2e;
-    --text-dim: rgba(26,14,46,0.65);
-    --text-faint: rgba(26,14,46,0.38);
-    --green: #4f2682;
-    --green-mid: #7b4fc9;
-    --green-light: #a67fe8;
-    --blue: #1a8a7a;
+    --bg:         #080b14;
+    --surface:    #0e1220;
+    --surface2:   #131829;
+    --surface3:   #1a2035;
+    --border:     rgba(255,255,255,0.07);
+    --border2:    rgba(255,255,255,0.12);
+    --accent:     #6c63ff;
+    --accent2:    #a78bfa;
+    --gold:       #f5a623;
+    --gold2:      #ffd27a;
+    --teal:       #2dd4bf;
+    --red:        #f87171;
+    --text:       #f0f4ff;
+    --text-dim:   rgba(240,244,255,0.6);
+    --text-faint: rgba(240,244,255,0.35);
+    --glow-a:     rgba(108,99,255,0.25);
+    --glow-g:     rgba(245,166,35,0.2);
   }
 
-  body { background: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; color: var(--text); }
 
-  /* ── BACKGROUND — soft gradient mesh ── */
+  /* ── APP SHELL ── */
   .app {
     min-height: 100vh;
-    background:
-      radial-gradient(ellipse 65% 55% at 10% 0%, rgba(166,127,232,0.28) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 45% at 90% 100%, rgba(224,123,0,0.14) 0%, transparent 50%),
-      radial-gradient(ellipse 40% 40% at 55% 45%, rgba(201,149,42,0.10) 0%, transparent 60%),
-      #f5f0ff;
-    color: var(--text);
-    padding-bottom: 80px;
+    background: var(--bg);
     position: relative;
+    overflow: hidden;
+  }
+  .app::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(108,99,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%, rgba(245,166,35,0.08) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 60% at 50% 50%, rgba(45,212,191,0.04) 0%, transparent 70%);
   }
 
-  /* ── FLOATING CLAY ORBS ── */
-  .orb { position:fixed; pointer-events:none; z-index:0; border-radius:50%; filter:blur(60px); }
-  .orb1 { width:520px;height:520px;background:radial-gradient(circle,rgba(166,127,232,0.35),rgba(123,79,201,0.12));top:-150px;left:-100px;animation:floatOrb 22s ease-in-out infinite; }
-  .orb2 { width:460px;height:460px;background:radial-gradient(circle,rgba(224,123,0,0.2),rgba(201,149,42,0.1));bottom:-80px;right:-80px;animation:floatOrb 28s ease-in-out infinite reverse; }
-  @keyframes floatOrb { 0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(25px,-35px) scale(1.04);}66%{transform:translate(-18px,18px) scale(0.97);} }
-
-  /* ── HEADER — glass panel ── */
+  /* ── HEADER ── */
   .header {
-    position: relative; z-index: 10;
-    padding: 18px 40px 16px;
+    position: sticky; top: 0; z-index: 50;
     display: flex; align-items: center; justify-content: space-between;
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255,255,255,0.75);
-    box-shadow: 0 2px 24px rgba(79,38,130,0.1), inset 0 -1px 0 rgba(79,38,130,0.06);
+    padding: 0 clamp(16px, 4vw, 48px);
+    height: 64px;
+    background: rgba(8,11,20,0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
   }
-  @media(max-width:600px){ .header{padding:14px 18px;} }
-  .header-left{display:flex;align-items:center;gap:14px;}
-
-  /* ── LOGO — clay pill ── */
+  .header-left { display: flex; align-items: center; gap: 12px; }
   .logo {
-    width:46px; height:46px; border-radius:16px;
-    background: linear-gradient(145deg,#7b4fc9,#4f2682);
-    display:flex; align-items:center; justify-content:center; font-size:22px;
-    box-shadow: 6px 8px 20px rgba(79,38,130,0.38), -2px -2px 8px rgba(255,255,255,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent), #4f46e5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 0 20px rgba(108,99,255,0.4);
   }
-  .brand h1 { font-family:'Lora',serif; font-size:22px; font-weight:600; color:var(--indigo); letter-spacing:-0.3px; }
-  .brand p { font-size:11px; color:var(--text-faint); margin-top:2px; font-weight:500; }
+  .brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(16px, 2.5vw, 20px);
+    font-weight: 700; color: var(--text); letter-spacing: -0.3px;
+  }
+  .brand-name span { color: var(--gold); font-style: italic; }
+  .brand-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--text-faint); margin-top: 1px; letter-spacing: 0.5px;
+  }
+  .header-pill {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 14px; border-radius: 99px;
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.25);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent2);
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal); box-shadow: 0 0 8px var(--teal);
+    animation: livePulse 2s ease-in-out infinite;
+  }
+  @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(0.8);} }
 
-  /* ── HEADER BADGE — glass pill ── */
-  .header-badge {
-    display:flex; align-items:center; gap:6px; padding:6px 14px;
-    background: rgba(255,255,255,0.5);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.8);
-    border-radius: 99px;
-    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--indigo); font-weight:500;
-    box-shadow: 0 2px 10px rgba(11,87,64,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+  /* ── STEP PROGRESS ── */
+  .step-bar {
+    display: flex; align-items: center;
+    max-width: 520px; margin: 28px auto 0;
+    padding: 0 clamp(16px,4vw,32px);
   }
-  .pulse-dot { width:6px;height:6px;border-radius:50%;background:var(--saffron);box-shadow:0 0 8px rgba(224,123,0,0.6);animation:blink 2s ease-in-out infinite; }
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
+  .step-item { display: flex; align-items: center; gap: 8px; flex: 1; transition: opacity 0.4s; }
+  .step-item.inactive { opacity: 0.3; }
+  .step-num {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    border: 1px solid var(--border2); background: var(--surface2); color: var(--text-faint);
+    transition: all 0.4s;
+  }
+  .step-num.active {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+    box-shadow: 0 0 16px rgba(108,99,255,0.5);
+  }
+  .step-num.done { background: rgba(108,99,255,0.15); border-color: rgba(108,99,255,0.4); color: var(--accent2); }
+  .step-num.scanning-pulse { animation: stepGlow 1s ease-in-out infinite; }
+  @keyframes stepGlow { 0%,100%{box-shadow:0 0 16px rgba(108,99,255,0.5);} 50%{box-shadow:0 0 28px rgba(108,99,255,0.8);} }
+  .step-label { font-size: 12px; font-weight: 500; color: var(--text-dim); }
+  .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 10px; position: relative; overflow: hidden; max-width: 60px; }
+  .step-line.active::after { content:''; position:absolute; inset:0; background: linear-gradient(90deg, var(--accent), var(--gold)); animation: lineFill 0.6s ease forwards; }
+  @keyframes lineFill { from{width:0%} to{width:100%} }
 
-  /* ── STEP BAR ── */
-  .step-bar{position:relative;z-index:5;max-width:700px;margin:32px auto 0;padding:0 28px;display:flex;align-items:center;}
-  .step-item{display:flex;align-items:center;gap:10px;flex:1;transition:opacity 0.4s;}
-  .step-item.inactive{opacity:0.35;}
-  .step-circle {
-    width:36px; height:36px; border-radius:50%; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:500;
-    background: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.85);
-    color:var(--text-faint); transition:all 0.4s;
-    box-shadow: 4px 6px 16px rgba(11,87,64,0.12), -1px -1px 4px rgba(255,255,255,0.8), inset 0 1px 0 rgba(255,255,255,0.9);
+  /* ── MAIN WRAP ── */
+  .main-wrap {
+    position: relative; z-index: 5;
+    max-width: 860px; margin: 24px auto 0;
+    padding: 0 clamp(12px, 4vw, 28px);
+    padding-bottom: 80px;
   }
-  .step-circle.active {
-    background: linear-gradient(145deg,#7b4fc9,#4f2682); color:#fff;
-    box-shadow: 5px 8px 20px rgba(79,38,130,0.38), -1px -1px 4px rgba(255,255,255,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-  }
-  .step-circle.done {
-    background: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.8); color:var(--green);
-    box-shadow: 3px 5px 12px rgba(11,87,64,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
-  }
-  .step-circle.scanning-pulse{animation:stepPulse 1.2s ease-in-out infinite;}
-  @keyframes stepPulse{0%,100%{box-shadow:5px 8px 20px rgba(79,38,130,0.38),-1px -1px 4px rgba(255,255,255,0.3);}50%{box-shadow:6px 10px 28px rgba(79,38,130,0.55),-1px -1px 4px rgba(255,255,255,0.3);}}
-  .step-info{display:flex;flex-direction:column;gap:2px;}
-  .step-title{font-size:13px;font-weight:600;color:var(--text);}
-  .step-sub{font-size:11px;color:var(--text-faint);font-family:'IBM Plex Mono',monospace;}
-  .step-connector{flex:1;height:1px;max-width:80px;margin:0 12px;background:rgba(255,255,255,0.5);position:relative;overflow:hidden;}
-  .step-connector.active::after{content:'';position:absolute;top:0;left:0;height:100%;width:100%;background:linear-gradient(90deg,var(--indigo),var(--saffron));animation:connFill 0.8s ease forwards;}
-  @keyframes connFill{from{width:0%;}to{width:100%;}}
 
-  .main-wrap{position:relative;z-index:5;max-width:900px;margin:24px auto 0;padding:0 28px;}
-  @media(max-width:600px){.main-wrap{padding:0 14px;}}
-
-  /* ── UPLOAD CARD — clay morphism ── */
-  .upload-card {
-    background: linear-gradient(145deg, rgba(255,255,255,0.75), rgba(240,252,246,0.65));
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.82);
-    border-radius: 28px;
-    overflow: hidden; position: relative; transition: all 0.5s;
-    box-shadow: var(--clay-shadow);
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden; position: relative;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    transition: all 0.4s;
   }
-  .upload-card::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:3px;
-    background: linear-gradient(90deg,#4f2682,#7b4fc9,#e07b00,#f5a623);
-    border-radius: 28px 28px 0 0;
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--gold), var(--teal));
   }
-  .upload-card.exit{animation:cardExit 0.5s ease forwards;}
-  @keyframes cardExit{0%{opacity:1;transform:scale(1);}100%{opacity:0;transform:scale(0.95) translateY(-20px);}}
-
+  .card.exit { animation: cardExit 0.45s ease forwards; }
+  @keyframes cardExit { to { opacity:0; transform: scale(0.96) translateY(-16px); } }
+  @keyframes cardEnter { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
+  .card-enter { animation: cardEnter 0.5s cubic-bezier(0.16,1,0.3,1) both; }
   .card-hdr {
-    padding:18px 24px 16px;
-    border-bottom:1px solid rgba(255,255,255,0.6);
-    display:flex; align-items:center; gap:10px;
-    background: rgba(255,255,255,0.35);
+    padding: 14px 20px 13px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
   }
-  .card-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--indigo);opacity:0.7;flex:1;}
+  .card-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-faint); flex: 1; }
   .card-tag {
-    font-family:'IBM Plex Mono',monospace; font-size:10px; padding:3px 10px;
-    border-radius:99px;
-    background: rgba(255,255,255,0.6);
-    border:1px solid rgba(255,255,255,0.85);
-    color:var(--indigo); font-weight:500;
-    box-shadow: 2px 3px 8px rgba(11,87,64,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px; padding: 3px 10px;
+    border-radius: 99px; background: rgba(108,99,255,0.12);
+    border: 1px solid rgba(108,99,255,0.25); color: var(--accent2);
   }
-  .upload-body{padding:24px;display:flex;flex-direction:column;gap:14px;}
+  .card-body { padding: clamp(16px,3vw,24px); display: flex; flex-direction: column; gap: 14px; }
 
-  /* ── DROP ZONE — inner glass ── */
+  /* ── DROP ZONE ── */
   .drop-zone {
-    position:relative;
-    border: 2px dashed rgba(11,87,64,0.2);
-    border-radius:20px; padding:48px 20px;
-    display:flex; flex-direction:column; align-items:center; gap:14px;
-    cursor:pointer; transition:all 0.3s;
-    background: rgba(255,255,255,0.3);
-    backdrop-filter: blur(8px);
+    position: relative; border: 2px dashed rgba(108,99,255,0.25); border-radius: 16px;
+    padding: clamp(36px,6vw,56px) 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    cursor: pointer; transition: all 0.3s; background: rgba(108,99,255,0.04);
   }
-  .drop-zone:hover,.drop-zone.dz-on {
-    border-color:rgba(11,87,64,0.5);
-    background: rgba(255,255,255,0.5);
-    box-shadow: inset 0 0 40px rgba(11,87,64,0.05), 0 0 0 4px rgba(11,87,64,0.06);
+  .drop-zone:hover, .drop-zone.dz-on {
+    border-color: var(--accent); background: rgba(108,99,255,0.08);
+    box-shadow: 0 0 0 4px rgba(108,99,255,0.08), inset 0 0 40px rgba(108,99,255,0.04);
   }
-  .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2;}
-  .dz-icon {
-    width:72px; height:72px; border-radius:50%;
-    background: linear-gradient(145deg,rgba(255,255,255,0.9),rgba(220,245,232,0.7));
-    border:1.5px solid rgba(255,255,255,0.9);
-    display:flex; align-items:center; justify-content:center; font-size:30px; z-index:1;
-    box-shadow: 5px 8px 20px rgba(11,87,64,0.18), -2px -2px 8px rgba(255,255,255,0.9), inset 0 1px 0 rgba(255,255,255,1);
+  .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
+  .dz-icon-wrap {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.25);
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    box-shadow: 0 0 24px rgba(108,99,255,0.2);
   }
-  .dz-text h3{font-size:15px;font-weight:700;color:var(--indigo);text-align:center;}
-  .dz-text p{font-size:12px;color:var(--text-faint);text-align:center;margin-top:4px;}
-  .fmt-chips{display:flex;gap:5px;}
+  .dz-title { font-size: 15px; font-weight: 600; color: var(--text); text-align: center; }
+  .dz-sub { font-size: 12px; color: var(--text-faint); text-align: center; }
+  .fmt-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
   .fchip {
-    font-family:'IBM Plex Mono',monospace; font-size:10px; padding:3px 9px; border-radius:8px;
-    background: rgba(255,255,255,0.55);
-    border:1px solid rgba(255,255,255,0.8);
-    color:var(--indigo); opacity:0.85;
-    box-shadow: 2px 3px 7px rgba(11,87,64,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 9px;
+    border-radius: 6px; background: var(--surface3); border: 1px solid var(--border2); color: var(--text-faint);
   }
-  .preview-wrap{position:relative;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,0.7);box-shadow:var(--clay-shadow-sm);}
-  .preview-wrap img{width:100%;max-height:260px;object-fit:contain;display:block;}
-  .preview-lbl{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(0deg,rgba(11,40,26,0.8),transparent);font-size:11px;color:rgba(180,240,210,0.9);font-family:'IBM Plex Mono',monospace;}
 
-  /* ── SCAN BUTTON — clay ── */
-  .btn-scan {
-    width:100%; padding:15px 20px; border:none; border-radius:16px;
-    cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; font-size:16px; font-weight:700;
-    transition:all 0.25s; display:flex; align-items:center; justify-content:center; gap:10px;
-    background: linear-gradient(145deg,#7b4fc9,#4f2682);
-    color:#fff;
-    box-shadow: 6px 10px 24px rgba(79,38,130,0.38), -2px -2px 8px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+  /* ── PREVIEW ── */
+  .preview-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--border2); }
+  .preview-wrap img { width: 100%; max-height: 260px; object-fit: contain; display: block; }
+  .preview-lbl {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 10px 14px; background: linear-gradient(0deg, rgba(8,11,20,0.9), transparent);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--teal);
   }
-  .btn-scan:hover:not(:disabled){transform:translateY(-2px);box-shadow:8px 14px 32px rgba(79,38,130,0.48),-2px -2px 8px rgba(255,255,255,0.2),inset 0 1px 0 rgba(255,255,255,0.2);}
-  .btn-scan:disabled{opacity:0.35;cursor:not-allowed;}
-  .btn-clear {
-    width:100%; padding:11px;
-    border:1.5px solid rgba(255,255,255,0.7); border-radius:12px;
-    background: rgba(255,255,255,0.35);
-    color:var(--text-faint); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px;
-    cursor:pointer; transition:all 0.2s;
-    box-shadow: 2px 3px 8px rgba(11,87,64,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+
+  /* ── API KEY INPUT ── */
+  .api-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--text-faint); }
+  .api-input {
+    width: 100%; padding: 11px 14px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 10px; color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none;
+    transition: border-color 0.2s;
   }
-  .btn-clear:hover{border-color:rgba(192,57,43,0.4);color:rgba(192,57,43,0.8);background:rgba(255,245,244,0.5);}
+  .api-input:focus { border-color: rgba(108,99,255,0.5); box-shadow: 0 0 0 3px rgba(108,99,255,0.08); }
+  .api-input.has-key { border-color: rgba(45,212,191,0.35); }
 
-  /* ── SCAN OVERLAY — VaidyaDrishti Mandala Animation ── */
-  .scan-overlay{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:radial-gradient(ellipse 100% 100% at 50% 50%,rgba(20,8,45,0.98),rgba(10,4,25,0.99));backdrop-filter:blur(20px);animation:overlayIn 0.5s ease both;}
-  @keyframes overlayIn{from{opacity:0;transform:scale(0.97);}to{opacity:1;transform:scale(1);}}
-  .scan-overlay.exit{animation:overlayOut 0.6s ease forwards;}
-  @keyframes overlayOut{0%{opacity:1;}100%{opacity:0;transform:scale(1.04);}}
-
-  /* Image with ornate frame */
-  .scan-image-wrap{position:relative;width:260px;border-radius:20px;overflow:hidden;border:2px solid rgba(224,123,0,0.45);box-shadow:0 0 50px rgba(123,79,201,0.35),0 0 100px rgba(224,123,0,0.15);}
-  .scan-image-wrap img{width:100%;max-height:180px;object-fit:contain;display:block;filter:brightness(0.45) saturate(0.6);}
-
-  /* Golden laser sweep */
-  .laser-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(224,123,0,0.4),rgba(245,166,35,1),rgba(255,210,100,1),rgba(245,166,35,1),rgba(224,123,0,0.4),transparent);box-shadow:0 0 18px rgba(245,166,35,0.9),0 0 36px rgba(224,123,0,0.5);animation:laserSweep 1.8s ease-in-out infinite;}
-  @keyframes laserSweep{0%{top:2%;}50%{top:98%;}100%{top:2%;}}
-  .scan-corner{position:absolute;width:22px;height:22px;border-color:rgba(245,166,35,0.9);border-style:solid;}
-  .sc-tl{top:8px;left:8px;border-width:2px 0 0 2px;} .sc-tr{top:8px;right:8px;border-width:2px 2px 0 0;}
-  .sc-bl{bottom:8px;left:8px;border-width:0 0 2px 2px;} .sc-br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
-
-  /* MANDALA — main animation ring system */
-  .mandala-wrap{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;}
-
-  /* Outer petals ring — 8 dots orbiting */
-  .mandala-orbit{position:absolute;width:160px;height:160px;border-radius:50%;animation:spinR 8s linear infinite;}
-  .mandala-petal{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--saffron);box-shadow:0 0 8px rgba(224,123,0,0.8);}
-  .mandala-petal:nth-child(1){top:0;left:50%;transform:translateX(-50%);}
-  .mandala-petal:nth-child(2){top:14%;right:14%;}
-  .mandala-petal:nth-child(3){top:50%;right:0;transform:translateY(-50%);}
-  .mandala-petal:nth-child(4){bottom:14%;right:14%;}
-  .mandala-petal:nth-child(5){bottom:0;left:50%;transform:translateX(-50%);}
-  .mandala-petal:nth-child(6){bottom:14%;left:14%;}
-  .mandala-petal:nth-child(7){top:50%;left:0;transform:translateY(-50%);}
-  .mandala-petal:nth-child(8){top:14%;left:14%;}
-
-  /* Dashed outer ring */
-  .mandala-ring1{position:absolute;width:150px;height:150px;border-radius:50%;border:1.5px dashed rgba(245,166,35,0.35);animation:spinR 12s linear infinite reverse;}
-  /* Solid mid ring — indigo */
-  .mandala-ring2{position:absolute;width:112px;height:112px;border-radius:50%;border:2px solid transparent;border-top-color:var(--indigo-light);border-right-color:var(--indigo-mid);animation:spinR 2.5s ease-in-out infinite;}
-  /* Inner saffron ring */
-  .mandala-ring3{position:absolute;width:76px;height:76px;border-radius:50%;border:2px solid transparent;border-top-color:var(--saffron-light);border-bottom-color:var(--saffron);animation:spinR 1.8s linear infinite reverse;}
-  /* Innermost glow ring */
-  .mandala-ring4{position:absolute;width:46px;height:46px;border-radius:50%;border:1.5px solid rgba(166,127,232,0.5);animation:mandalaGlow 2s ease-in-out infinite;}
-  @keyframes mandalaGlow{0%,100%{box-shadow:0 0 10px rgba(123,79,201,0.4),inset 0 0 10px rgba(123,79,201,0.15);}50%{box-shadow:0 0 22px rgba(123,79,201,0.7),inset 0 0 18px rgba(123,79,201,0.3);}}
-
-  /* Center eye of wisdom */
-  .mandala-core{position:absolute;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.9),rgba(224,123,0,0.7),rgba(123,79,201,0.4));border:1.5px solid rgba(245,166,35,0.7);animation:corePulse 1.8s ease-in-out infinite;box-shadow:0 0 16px rgba(224,123,0,0.7),0 0 32px rgba(123,79,201,0.4);}
-  @keyframes spinR{to{transform:rotate(360deg);}} @keyframes corePulse{0%,100%{transform:scale(1);}50%{transform:scale(1.25);}}
-
-  /* Progress */
-  .scan-prog-wrap{width:280px;}
-  .scan-prog-label{display:flex;justify-content:space-between;margin-bottom:8px;}
-  .scan-prog-title{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(245,166,35,0.9);text-transform:uppercase;letter-spacing:2px;}
-  .scan-prog-pct{font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(200,185,230,0.5);}
-  .scan-prog-track{height:3px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;}
-  .scan-prog-fill{height:100%;background:linear-gradient(90deg,#4f2682,#7b4fc9,#e07b00,#f5a623);border-radius:99px;transition:width 0.3s ease;}
-
-  /* Step list */
-  .scan-steps{display:flex;flex-direction:column;gap:7px;width:280px;}
-  .scan-step{display:flex;align-items:center;gap:10px;padding:8px 13px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(210,195,240,0.4);transition:all 0.4s;}
-  .scan-step.active{background:rgba(123,79,201,0.12);border-color:rgba(123,79,201,0.3);color:rgba(220,205,250,0.9);}
-  .scan-step.done{background:rgba(224,123,0,0.08);border-color:rgba(224,123,0,0.2);color:rgba(245,166,35,0.85);}
-  .ss-icon{font-size:14px;flex-shrink:0;}
-
-  /* Sanskrit header text inside overlay */
-  .scan-brand{font-family:'Lora',serif;font-size:13px;color:rgba(245,166,35,0.7);letter-spacing:3px;text-transform:uppercase;margin-bottom:-10px;}
-
-  /* ── RESULTS CARD — clay ── */
-  .results-card {
-    background: linear-gradient(145deg, rgba(255,255,255,0.72), rgba(238,252,244,0.62));
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.82);
-    border-radius: 28px; overflow:hidden; position:relative;
-    animation:cardEnter 0.6s cubic-bezier(0.16,1,0.3,1) both;
-    box-shadow: var(--clay-shadow);
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%; padding: 14px 20px; border: none; border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), #4f46e5);
+    color: #fff; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.4), 0 0 0 1px rgba(108,99,255,0.2);
   }
-  .results-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#4f2682,#7b4fc9,#e07b00,#f5a623);border-radius:28px 28px 0 0;}
-  @keyframes cardEnter{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
-  .results-body{padding:22px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;}
-  .results-body::-webkit-scrollbar{width:3px;}
-  .results-body::-webkit-scrollbar-thumb{background:rgba(11,87,64,0.2);border-radius:99px;}
+  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(108,99,255,0.5), 0 0 0 1px rgba(108,99,255,0.3); }
+  .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-ghost {
+    width: 100%; padding: 11px; border: 1px solid var(--border2); border-radius: 12px;
+    background: transparent; color: var(--text-faint); font-family: 'Inter', sans-serif; font-size: 13px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: rgba(248,113,113,0.4); color: var(--red); background: rgba(248,113,113,0.05); }
+
+  .btn-sm {
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px;
+    border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; border: 1px solid var(--border2);
+    background: var(--surface2); color: var(--text-dim);
+  }
+  .btn-sm:hover { border-color: rgba(108,99,255,0.4); color: var(--accent2); background: rgba(108,99,255,0.08); }
+  .btn-sm.copied { border-color: rgba(45,212,191,0.4); color: var(--teal); background: rgba(45,212,191,0.06); }
+
+  .btn-action {
+    display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+    border: 1px solid var(--border2); border-radius: 10px;
+    background: var(--surface2); color: var(--text-dim);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-action:hover { border-color: rgba(108,99,255,0.35); color: var(--accent2); background: rgba(108,99,255,0.07); }
+  .btn-action:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-danger {
+    display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+    border: 1px solid rgba(248,113,113,0.2); border-radius: 10px;
+    background: rgba(248,113,113,0.06); color: var(--red);
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-danger:hover { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.4); }
+  .btn-danger:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .btn-rescan {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 12px 20px;
+    border: 1px solid var(--border2); border-radius: 12px;
+    background: var(--surface2); color: var(--text-dim);
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; margin-top: 4px;
+  }
+  .btn-rescan:hover { border-color: rgba(108,99,255,0.35); color: var(--accent2); background: rgba(108,99,255,0.07); }
+
+  /* ── HISTORY ── */
+  .hist-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .hist-title { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-faint); }
+  .btn-clr-hist {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px; padding: 3px 8px;
+    border: 1px solid rgba(248,113,113,0.2); border-radius: 6px;
+    background: transparent; color: rgba(248,113,113,0.5); cursor: pointer; transition: all 0.2s;
+  }
+  .btn-clr-hist:hover { background: rgba(248,113,113,0.08); color: var(--red); }
+  .hist-list { display: flex; flex-direction: column; gap: 6px; }
+  .hist-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 11px 14px; border-radius: 12px;
+    background: var(--surface2); border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .hist-item:hover { border-color: rgba(108,99,255,0.3); background: var(--surface3); }
+  .hist-patient { font-size: 13px; font-weight: 600; color: var(--text); }
+  .hist-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+  .hist-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 9px;
+    border-radius: 99px; background: rgba(108,99,255,0.12);
+    border: 1px solid rgba(108,99,255,0.25); color: var(--accent2); white-space: nowrap;
+  }
+
+  /* ── MULTI PAGE ── */
+  .pages-lbl { display: flex; align-items: center; gap: 8px; }
+  .pages-lbl span:first-child { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--text-faint); }
+  .page-badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px; padding: 2px 9px;
+    border-radius: 99px; background: rgba(108,99,255,0.12);
+    border: 1px solid rgba(108,99,255,0.25); color: var(--accent2);
+  }
+  .thumbs-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .thumb-wrap { position: relative; width: 76px; height: 76px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border2); flex-shrink: 0; }
+  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb-del {
+    position: absolute; top: 3px; right: 3px; width: 18px; height: 18px;
+    border-radius: 50%; background: rgba(248,113,113,0.85); border: none; color: #fff;
+    font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .btn-add-thumb {
+    width: 76px; height: 76px; border-radius: 10px; flex-shrink: 0;
+    border: 2px dashed rgba(108,99,255,0.25); background: rgba(108,99,255,0.04);
+    color: rgba(108,99,255,0.4); font-size: 22px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .btn-add-thumb:hover { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
 
   /* ── STATS GRID ── */
-  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media(max-width:480px){ .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; } }
   .stat-tile {
-    padding:14px 16px; border-radius:18px;
-    background: linear-gradient(145deg,rgba(255,255,255,0.7),rgba(220,248,234,0.55));
-    border:1px solid rgba(255,255,255,0.82);
-    display:flex; flex-direction:column; gap:4px;
-    box-shadow: var(--clay-shadow-sm);
+    padding: 14px 16px; border-radius: 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 5px;
   }
-  .st-icon{font-size:18px;} .st-val{font-family:'Lora',serif;font-size:26px;color:var(--green);line-height:1;font-weight:600;} .st-lbl{font-size:11px;color:var(--text-faint);}
-  .results-actions{display:flex;gap:8px;margin-bottom:4px;}
+  .stat-ico { font-size: 16px; }
+  .stat-val { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--accent2); line-height: 1; }
+  .stat-lbl { font-size: 11px; color: var(--text-faint); }
 
-  /* ── NOTES BOX — glass card ── */
-  .notes-box {
-    background: rgba(255,255,255,0.48);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.78);
-    border-left: 3px solid var(--indigo);
-    border-radius:16px; padding:14px 16px;
-    box-shadow: var(--glass-shadow);
+  /* ── SECTION DIVIDER ── */
+  .sec-div {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--text-faint);
   }
-  .nlbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.8px;color:var(--indigo);margin-bottom:7px;font-weight:500;}
-  .ntxt{font-size:13px;color:var(--text-dim);line-height:1.6;}
+  .sec-div::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
   /* ── INFO BOX ── */
   .info-box {
-    background: rgba(255,255,255,0.48);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.78);
-    border-left: 3px solid var(--blue);
-    border-radius:16px; padding:14px 16px;
-    box-shadow: var(--glass-shadow);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-left: 2px solid var(--teal); border-radius: 14px; padding: 14px 16px;
   }
-  .ibox-hdr{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.8px;color:var(--teal);margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:500;}
-  .ibox-hdr::after{content:'';flex:1;height:1px;background:rgba(26,111,160,0.15);}
-  .irow{display:flex;align-items:baseline;gap:10px;font-size:13px;margin-bottom:5px;}
-  .irow:last-child{margin-bottom:0;}
-  .ikey{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--text-faint);min-width:58px;text-transform:uppercase;letter-spacing:0.8px;}
-  .ival{color:var(--text);font-weight:500;}
+  .info-hdr { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--teal); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .info-hdr::after { content: ''; flex: 1; height: 1px; background: rgba(45,212,191,0.15); }
+  .info-row { display: flex; align-items: baseline; gap: 10px; font-size: 13px; margin-bottom: 6px; }
+  .info-row:last-child { margin-bottom: 0; }
+  .info-key { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text-faint); min-width: 60px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .info-val { color: var(--text); font-weight: 500; }
 
-  /* ── SECTION LABEL ── */
-  .sec-lbl{display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:2px;color:var(--indigo);opacity:0.7;}
-  .sec-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.6);}
+  /* ── NOTES BOX ── */
+  .notes-box { background: var(--surface2); border: 1px solid var(--border); border-left: 2px solid var(--accent); border-radius: 14px; padding: 14px 16px; }
+  .notes-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--accent2); margin-bottom: 7px; }
+  .notes-txt { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
 
-  /* ── MED CARD — clay morphism ── */
+  /* ── MED CARD ── */
   .med-card {
-    background: linear-gradient(145deg,rgba(255,255,255,0.7),rgba(232,250,240,0.58));
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.82);
-    border-radius: 20px; overflow:hidden; position:relative; margin-bottom:2px;
-    box-shadow: var(--clay-shadow-sm);
-    transition: all 0.25s;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; position: relative;
+    transition: border-color 0.2s, transform 0.2s;
   }
-  .med-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--clay-shadow-hover);
-  }
-  .med-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4f2682,#7b4fc9,#e07b00);border-radius:4px 0 0 4px;}
-  .mc-top{padding:14px 16px 0 19px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-  .mc-name{font-family:'Lora',serif;font-size:18px;color:var(--indigo);line-height:1.2;font-weight:600;}
+  .med-card:hover { border-color: rgba(108,99,255,0.3); transform: translateY(-1px); }
+  .med-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent), var(--gold), var(--teal)); }
+  .mc-top { padding: 14px 16px 0 18px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .mc-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; flex: 1; }
+  .mc-name { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); font-weight: 600; }
   .mc-badge {
-    padding:3px 10px;
-    background: linear-gradient(135deg,rgba(224,123,0,0.1),rgba(245,166,35,0.07));
-    border:1px solid rgba(224,123,0,0.25);
-    border-radius:8px;
-    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--saffron); white-space:nowrap; flex-shrink:0; font-weight:600;
-    box-shadow: 2px 3px 8px rgba(224,123,0,0.12), inset 0 1px 0 rgba(255,255,255,1);
+    padding: 3px 10px; border-radius: 8px;
+    background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.25);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold);
+    white-space: nowrap; font-weight: 600; flex-shrink: 0;
   }
-  .mc-desc{padding:7px 16px 0 19px;font-size:12px;color:rgba(26,111,160,0.85);font-style:italic;line-height:1.5;display:flex;gap:5px;align-items:flex-start;}
-  .mc-desc-i{font-size:11px;flex-shrink:0;opacity:0.7;font-style:normal;}
-  .mc-div{margin:11px 16px 0 19px;height:1px;background:rgba(255,255,255,0.55);}
-  .mc-details{padding:9px 16px 14px 19px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .mc-det{display:flex;flex-direction:column;gap:2px;} .mc-det.fw{grid-column:1/-1;}
-  .dlbl{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);}
-  .dval{font-size:12.5px;color:var(--text);font-weight:600;line-height:1.4;}
+  .mc-desc { padding: 6px 16px 0 18px; font-size: 12px; color: var(--text-faint); font-style: italic; line-height: 1.5; }
+  .mc-div { margin: 10px 16px 0 18px; height: 1px; background: var(--border); }
+  .mc-details { padding: 10px 16px 14px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mc-det { display: flex; flex-direction: column; gap: 2px; }
+  .mc-det.fw { grid-column: 1 / -1; }
+  .dlbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); }
+  .dval { font-size: 12.5px; color: var(--text); font-weight: 500; line-height: 1.4; }
 
-  /* ── ERROR BOX ── */
-  .err-box{background:rgba(255,240,240,0.6);backdrop-filter:blur(10px);border:1px solid rgba(192,57,43,0.2);border-left:3px solid var(--red);border-radius:14px;padding:14px 16px;display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--red);line-height:1.5;}
+  /* ── CONFIDENCE BAR ── */
+  .conf-row { display: flex; align-items: center; gap: 8px; padding: 4px 16px 0 18px; }
+  .conf-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); white-space: nowrap; }
+  .conf-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 99px; transition: width 0.6s ease; }
+  .conf-pct { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text-faint); }
 
-  /* ── RESCAN BUTTON — clay ── */
-  .btn-rescan {
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    padding:12px 20px;
-    background: rgba(255,255,255,0.55);
-    backdrop-filter: blur(10px);
-    border: 1.5px solid rgba(255,255,255,0.85);
-    border-radius:14px; color:var(--green);
-    font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700;
-    cursor:pointer; transition:all 0.2s; margin-top:4px;
-    box-shadow: 4px 6px 16px rgba(11,87,64,0.12), -1px -1px 4px rgba(255,255,255,0.8), inset 0 1px 0 rgba(255,255,255,0.9);
-  }
-  .btn-rescan:hover{transform:translateY(-1px);box-shadow:5px 8px 20px rgba(11,87,64,0.18),-1px -1px 4px rgba(255,255,255,0.8),inset 0 1px 0 rgba(255,255,255,0.9);}
-  .count-pill{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 10px;margin-left:auto;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.85);border-radius:99px;color:var(--indigo);font-weight:500;box-shadow:2px 3px 8px rgba(79,38,130,0.1),inset 0 1px 0 rgba(255,255,255,1);}
-
-  /* ── COPY BUTTON ── */
-  .btn-copy {
-    padding:4px 10px;
-    border:1px solid rgba(255,255,255,0.82); border-radius:8px;
-    background: rgba(255,255,255,0.55);
-    color:var(--indigo); font-family:'IBM Plex Mono',monospace; font-size:10px;
-    cursor:pointer; transition:all 0.2s; flex-shrink:0; margin-left:auto; font-weight:500;
-    box-shadow: 2px 3px 8px rgba(11,87,64,0.1), inset 0 1px 0 rgba(255,255,255,1);
-  }
-  .btn-copy:hover{background:rgba(255,255,255,0.75);}
-  .btn-copy.copied{background:rgba(245,230,255,0.7);border-color:rgba(123,79,201,0.3);color:var(--indigo-mid);}
-
-  /* ── PDF / ACTION BUTTONS ── */
-  .btn-pdf {
-    display:flex; align-items:center; gap:6px; padding:8px 16px;
-    border:1px solid rgba(255,255,255,0.82); border-radius:11px;
-    background: rgba(255,255,255,0.5);
-    color:var(--indigo); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:600;
-    cursor:pointer; transition:all 0.2s;
-    box-shadow: 3px 5px 14px rgba(79,38,130,0.1), inset 0 1px 0 rgba(255,255,255,0.95);
-  }
-  .btn-pdf:hover{background:rgba(255,255,255,0.72);}
-  .results-actions{display:flex;gap:8px;margin-bottom:4px;}
-
-  /* ── HISTORY PANEL ── */
-  .history-section{margin-top:8px;}
-  .history-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .history-title{font-family:'IBM Plex Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--indigo);opacity:0.65;}
-  .btn-clear-history{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border:1px solid rgba(192,57,43,0.2);border-radius:6px;background:transparent;color:rgba(192,57,43,0.5);cursor:pointer;transition:all 0.2s;}
-  .btn-clear-history:hover{background:rgba(192,57,43,0.06);color:rgba(192,57,43,0.85);}
-  .history-list{display:flex;flex-direction:column;gap:8px;}
-  .history-item {
-    padding:12px 14px; border-radius:14px;
-    background: rgba(255,255,255,0.5);
-    backdrop-filter: blur(10px);
-    border:1px solid rgba(255,255,255,0.8);
-    cursor:pointer; transition:all 0.2s;
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    box-shadow: 3px 5px 14px rgba(11,87,64,0.09), inset 0 1px 0 rgba(255,255,255,0.9);
-  }
-  .history-item:hover{background:rgba(255,255,255,0.68);transform:translateY(-1px);box-shadow:4px 7px 18px rgba(11,87,64,0.13),inset 0 1px 0 rgba(255,255,255,0.9);}
-  .history-info{display:flex;flex-direction:column;gap:3px;}
-  .history-patient{font-size:13px;font-weight:700;color:var(--text);}
-  .history-meta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text-faint);}
-  .history-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 8px;background:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.88);border-radius:99px;color:var(--indigo);white-space:nowrap;font-weight:500;box-shadow:1px 2px 5px rgba(79,38,130,0.1),inset 0 1px 0 rgba(255,255,255,1);}
-
-  /* ── SEARCH LINK BUTTON ── */
+  /* ── SEARCH BTNS ── */
   .btn-search {
-    display:inline-flex; align-items:center; gap:4px; padding:3px 9px;
-    border:1px solid rgba(255,255,255,0.8); border-radius:7px;
-    background: rgba(255,255,255,0.5);
-    color:var(--teal); font-family:'IBM Plex Mono',monospace; font-size:10px;
-    cursor:pointer; text-decoration:none; transition:all 0.2s; margin-left:4px; font-weight:500;
-    box-shadow: 1px 2px 6px rgba(26,111,160,0.1), inset 0 1px 0 rgba(255,255,255,1);
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+    border: 1px solid var(--border2); border-radius: 7px;
+    background: var(--surface2); color: var(--teal);
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    cursor: pointer; text-decoration: none; transition: all 0.2s; margin-left: 4px; font-weight: 500;
   }
-  .btn-search:hover{background:rgba(255,255,255,0.75);box-shadow:2px 4px 10px rgba(26,111,160,0.15),inset 0 1px 0 rgba(255,255,255,1);}
-  .mc-name-row{display:flex;align-items:center;flex-wrap:wrap;gap:4px;}
+  .btn-search:hover { border-color: rgba(45,212,191,0.35); background: rgba(45,212,191,0.06); }
 
   /* ── SCHEDULE ── */
-  .schedule-box {
-    background: rgba(255,255,255,0.42);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255,255,255,0.75);
-    border-radius:18px; padding:14px 16px;
-    box-shadow: var(--glass-shadow);
-  }
-  .schedule-hdr{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.8px;color:var(--indigo);margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:500;}
-  .schedule-hdr::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.6);}
-  .schedule-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-  @media(max-width:600px){.schedule-grid{grid-template-columns:1fr;}}
-  .schedule-slot {
-    border-radius:12px;
-    background: rgba(255,255,255,0.55);
-    border:1px solid rgba(255,255,255,0.85);
-    padding:10px 12px;
-    box-shadow: 3px 5px 14px rgba(11,87,64,0.08), inset 0 1px 0 rgba(255,255,255,1);
-  }
-  .slot-time{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-faint);margin-bottom:6px;}
-  .slot-meds{display:flex;flex-direction:column;gap:4px;}
-  .slot-med{font-size:12px;color:var(--text-dim);display:flex;align-items:baseline;gap:6px;}
-  .slot-dose{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--saffron);flex-shrink:0;font-weight:600;}
+  .schedule-box { background: var(--surface2); border: 1px solid var(--border); border-left: 2px solid var(--gold); border-radius: 14px; padding: 14px 16px; }
+  .sched-hdr { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .sched-hdr::after { content: ''; flex: 1; height: 1px; background: rgba(245,166,35,0.15); }
+  .sched-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media(max-width:500px){ .sched-grid { grid-template-columns: 1fr; } }
+  .sched-slot { background: var(--surface3); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .slot-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-faint); margin-bottom: 6px; }
+  .slot-meds { display: flex; flex-direction: column; gap: 4px; }
+  .slot-med { font-size: 12px; color: var(--text-dim); display: flex; align-items: baseline; gap: 6px; }
+  .slot-dose { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--gold); flex-shrink: 0; font-weight: 600; }
 
   /* ── TRANSLATE ── */
-  .translate-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-  .btn-translate {
-    display:flex; align-items:center; gap:6px; padding:8px 14px;
-    border:1px solid rgba(255,255,255,0.82); border-radius:11px;
-    background: rgba(255,255,255,0.5);
-    color:var(--indigo); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:600;
-    cursor:pointer; transition:all 0.2s;
-    box-shadow: 3px 5px 14px rgba(79,38,130,0.1), inset 0 1px 0 rgba(255,255,255,0.95);
-  }
-  .btn-translate:hover{background:rgba(255,255,255,0.72);}
-  .btn-translate:disabled{opacity:0.4;cursor:not-allowed;}
+  .translate-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .lang-select {
-    padding:8px 12px; border:1px solid rgba(255,255,255,0.82); border-radius:11px;
+    padding: 8px 12px; border: 1px solid var(--border2); border-radius: 10px;
+    background: var(--surface2); color: var(--text);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; cursor: pointer;
+  }
+  .lang-select option { background: var(--surface); color: var(--text); }
+  .translated-box { background: var(--surface2); border: 1px solid var(--border); border-left: 2px solid var(--accent2); border-radius: 14px; padding: 14px 16px; }
+  .trans-hdr { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--accent2); margin-bottom: 8px; }
+  .trans-txt { font-size: 13px; color: var(--text-dim); line-height: 1.7; white-space: pre-wrap; }
+
+  /* ── INTERACTIONS ── */
+  .int-box { background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.2); border-left: 2px solid var(--red); border-radius: 14px; padding: 14px 16px; }
+  .int-hdr { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: 1.8px; color: var(--red); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .int-hdr::after { content: ''; flex: 1; height: 1px; background: rgba(248,113,113,0.15); }
+  .int-item { padding: 8px 10px; border-radius: 8px; background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.12); margin-bottom: 6px; font-size: 12px; color: rgba(255,180,180,0.85); line-height: 1.5; }
+  .int-item:last-child { margin-bottom: 0; }
+  .int-pair { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--red); margin-bottom: 3px; font-weight: 600; }
+  .int-safe { font-size: 12px; color: var(--teal); display: flex; align-items: center; gap: 6px; font-weight: 500; }
+
+  /* ── ERR BOX ── */
+  .err-box { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2); border-radius: 12px; padding: 14px 16px; display: flex; gap: 9px; align-items: flex-start; font-size: 13px; color: var(--red); line-height: 1.5; }
+
+  /* ══════════════════════════════════════════════
+     SCAN OVERLAY — CINEMATIC DEEP SPACE
+  ══════════════════════════════════════════════ */
+  .scan-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: clamp(16px, 3vh, 28px);
+    background: #040610;
+    animation: soIn 0.5s ease both;
+    overflow: hidden;
+  }
+  @keyframes soIn { from{opacity:0;} to{opacity:1;} }
+  .scan-overlay.exit { animation: soOut 0.5s ease forwards; }
+  @keyframes soOut { to{opacity:0;transform:scale(1.03);} }
+
+  /* Ambient nebula glow layers */
+  .scan-overlay::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 50% at 30% 40%, rgba(108,99,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 70% 60%, rgba(245,166,35,0.07) 0%, transparent 55%);
+    animation: nebulaShift 8s ease-in-out infinite alternate;
+  }
+  @keyframes nebulaShift { 0%{transform:scale(1) rotate(0deg);} 100%{transform:scale(1.1) rotate(2deg);} }
+
+  /* Particle field */
+  .scan-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .scan-particles::before, .scan-particles::after {
+    content: ''; position: absolute;
+    width: 1px; height: 1px; border-radius: 50%;
     background: rgba(255,255,255,0.6);
-    color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12px; outline:none; cursor:pointer;
-    box-shadow: 3px 4px 12px rgba(11,87,64,0.1), inset 0 1px 0 rgba(255,255,255,1);
+    box-shadow:
+      120px 80px 0 rgba(108,99,255,0.6), 240px 160px 0 rgba(255,255,255,0.4),
+      80px 240px 0 rgba(245,166,35,0.5), 360px 120px 0 rgba(45,212,191,0.4),
+      480px 200px 0 rgba(255,255,255,0.3), 600px 80px 0 rgba(108,99,255,0.4),
+      720px 300px 0 rgba(245,166,35,0.3), 160px 360px 0 rgba(255,255,255,0.5),
+      300px 400px 0 rgba(45,212,191,0.3), 520px 380px 0 rgba(108,99,255,0.3),
+      40px 180px 0 rgba(255,255,255,0.25), 680px 440px 0 rgba(245,166,35,0.4),
+      200px 480px 0 rgba(255,255,255,0.3), 440px 60px 0 rgba(45,212,191,0.4),
+      780px 160px 0 rgba(108,99,255,0.25);
+    animation: twinkle 4s ease-in-out infinite;
   }
-  .lang-select option{background:#fff;color:#0d2218;}
-  .translated-box {
-    background: rgba(255,255,255,0.42);
-    backdrop-filter: blur(12px);
-    border:1px solid rgba(255,255,255,0.75);
-    border-left:3px solid var(--green);
-    border-radius:14px; padding:14px 16px;
-    box-shadow: var(--glass-shadow);
-  }
-  .translated-hdr{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.8px;color:var(--indigo);margin-bottom:8px;font-weight:500;}
-  .translated-text{font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;}
+  .scan-particles::after { animation: twinkle 4s ease-in-out infinite 2s; opacity: 0.6; }
+  @keyframes twinkle { 0%,100%{opacity:0.8;} 50%{opacity:0.2;} }
 
-  /* ── DRUG INTERACTIONS ── */
-  .interaction-box {
-    background: rgba(255,245,244,0.6);
-    backdrop-filter: blur(12px);
-    border:1px solid rgba(255,255,255,0.75);
-    border-left:3px solid var(--red);
-    border-radius:14px; padding:14px 16px;
-    box-shadow: 0 6px 24px rgba(192,57,43,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  /* ── SCAN IMAGE FRAME ── */
+  .scan-frame {
+    position: relative; z-index: 5;
+    width: clamp(180px, 35vw, 260px);
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid rgba(108,99,255,0.4);
+    box-shadow: 0 0 40px rgba(108,99,255,0.3), 0 0 80px rgba(108,99,255,0.1);
   }
-  .interaction-hdr{font-family:'IBM Plex Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:1.8px;color:var(--red);margin-bottom:10px;display:flex;align-items:center;gap:8px;font-weight:500;}
-  .interaction-hdr::after{content:'';flex:1;height:1px;background:rgba(192,57,43,0.12);}
-  .interaction-item{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,0.5);border:1px solid rgba(192,57,43,0.12);margin-bottom:6px;font-size:12px;color:#7b1d1d;line-height:1.5;}
-  .interaction-item:last-child{margin-bottom:0;}
-  .interaction-pair{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--red);margin-bottom:3px;font-weight:600;}
-  .no-interactions{font-size:12px;color:var(--teal);display:flex;align-items:center;gap:6px;font-weight:500;}
-  .btn-interactions {
-    display:flex; align-items:center; gap:6px; padding:8px 14px;
-    border:1px solid rgba(192,57,43,0.2); border-radius:11px;
-    background: rgba(255,245,244,0.55);
-    color:var(--red); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:600;
-    cursor:pointer; transition:all 0.2s;
-    box-shadow: 3px 5px 14px rgba(192,57,43,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  .scan-frame img { width: 100%; max-height: 180px; object-fit: contain; display: block; filter: brightness(0.4) saturate(0.5); }
+  /* scan grid overlay */
+  .scan-frame::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(rgba(108,99,255,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,99,255,0.07) 1px, transparent 1px);
+    background-size: 20px 20px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
   }
-  .btn-interactions:hover{background:rgba(255,235,234,0.7);}
-  .btn-interactions:disabled{opacity:0.4;cursor:not-allowed;}
+  /* corner brackets */
+  .scan-corner { position: absolute; width: 18px; height: 18px; border-color: var(--accent2); border-style: solid; }
+  .sc-tl { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+  .sc-tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+  .sc-bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+  .sc-br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+  /* scan beam */
+  .scan-beam {
+    position: absolute; left: 0; right: 0; height: 2px; z-index: 2;
+    background: linear-gradient(90deg, transparent, rgba(108,99,255,0.4), rgba(167,139,250,1), rgba(255,255,255,0.9), rgba(167,139,250,1), rgba(108,99,255,0.4), transparent);
+    box-shadow: 0 0 12px rgba(167,139,250,0.8), 0 0 24px rgba(108,99,255,0.5);
+    animation: beamScan 2s cubic-bezier(0.4,0,0.6,1) infinite;
+  }
+  @keyframes beamScan { 0%{top:5%;opacity:1;} 45%{top:95%;opacity:0.9;} 50%{top:95%;opacity:0;} 51%{top:5%;opacity:0;} 55%{top:5%;opacity:1;} 100%{top:95%;opacity:0.9;} }
 
-  /* ── CONFIDENCE SCORE ── */
-  .confidence-bar{display:flex;align-items:center;gap:8px;padding:5px 16px 0 19px;}
-  .conf-label{font-family:'IBM Plex Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-faint);white-space:nowrap;}
-  .conf-track{flex:1;height:3px;background:rgba(255,255,255,0.5);border-radius:99px;overflow:hidden;}
-  .conf-fill{height:100%;border-radius:99px;transition:width 0.6s ease;}
-  .conf-pct{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-faint);white-space:nowrap;}
+  /* ── CORE ANIMATION — ORBITING RINGS ── */
+  .scan-anim { position: relative; z-index: 5; width: 160px; height: 160px; }
 
-  /* ── MULTI-PAGE ── */
-  .multi-images{display:flex;gap:8px;flex-wrap:wrap;}
-  .thumb-wrap{position:relative;width:80px;height:80px;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.8);flex-shrink:0;box-shadow:var(--clay-shadow-sm);}
-  .thumb-wrap img{width:100%;height:100%;object-fit:cover;}
-  .thumb-del{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(192,57,43,0.85);border:none;color:#fff;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 2px 6px rgba(192,57,43,0.4);}
-  .btn-add-page {
-    width:80px; height:80px; border-radius:12px;
-    border:2px dashed rgba(11,87,64,0.25);
-    background: rgba(255,255,255,0.38);
-    color:rgba(11,87,64,0.45); font-size:22px;
-    cursor:pointer; display:flex; align-items:center; justify-content:center;
-    transition:all 0.2s; flex-shrink:0;
-    box-shadow: 3px 5px 14px rgba(11,87,64,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+  /* outer ambient ring */
+  .so-ring { position: absolute; border-radius: 50%; }
+  .so-r0 {
+    inset: 0; border: 1px dashed rgba(108,99,255,0.2);
+    animation: soSpin 20s linear infinite;
   }
-  .btn-add-page:hover{border-color:var(--indigo);color:var(--indigo);background:rgba(255,255,255,0.55);}
-  .page-count-badge{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 9px;background:rgba(255,255,255,0.62);border:1px solid rgba(255,255,255,0.88);border-radius:99px;color:var(--indigo);font-weight:500;box-shadow:2px 3px 8px rgba(79,38,130,0.1),inset 0 1px 0 rgba(255,255,255,1);}
-`
+  .so-r1 {
+    inset: 10px; border: 1px solid transparent;
+    border-top-color: rgba(108,99,255,0.7); border-right-color: rgba(108,99,255,0.3);
+    animation: soSpin 3s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(108,99,255,0.5));
+  }
+  .so-r2 {
+    inset: 28px; border: 1.5px solid transparent;
+    border-top-color: rgba(245,166,35,0.8); border-left-color: rgba(245,166,35,0.4);
+    animation: soSpin 2s linear infinite reverse;
+    filter: drop-shadow(0 0 5px rgba(245,166,35,0.5));
+  }
+  .so-r3 {
+    inset: 48px; border: 1px solid transparent;
+    border-top-color: rgba(45,212,191,0.7); border-right-color: rgba(45,212,191,0.2);
+    animation: soSpin 1.4s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(45,212,191,0.5));
+  }
+  @keyframes soSpin { to { transform: rotate(360deg); } }
+
+  /* Orbiting dot on ring 1 */
+  .so-dot1 {
+    position: absolute; inset: 10px; border-radius: 50%;
+    animation: soSpin 3s linear infinite;
+  }
+  .so-dot1::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%) translateY(-50%);
+    width: 6px; height: 6px; border-radius: 50%; background: var(--accent2);
+    box-shadow: 0 0 10px var(--accent2), 0 0 20px rgba(108,99,255,0.5);
+  }
+  /* Orbiting dot on ring 2 */
+  .so-dot2 {
+    position: absolute; inset: 28px; border-radius: 50%;
+    animation: soSpin 2s linear infinite reverse;
+  }
+  .so-dot2::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%) translateY(-50%);
+    width: 5px; height: 5px; border-radius: 50%; background: var(--gold);
+    box-shadow: 0 0 8px var(--gold), 0 0 16px rgba(245,166,35,0.4);
+  }
+
+  /* Center core */
+  .so-core {
+    position: absolute; inset: 58px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(167,139,250,0.5), rgba(108,99,255,0.3), transparent);
+    border: 1px solid rgba(167,139,250,0.5);
+    animation: coreBreath 2s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(108,99,255,0.4), inset 0 0 16px rgba(167,139,250,0.2);
+  }
+  @keyframes coreBreath {
+    0%,100% { transform: scale(1); box-shadow: 0 0 20px rgba(108,99,255,0.4), inset 0 0 16px rgba(167,139,250,0.2); }
+    50% { transform: scale(1.2); box-shadow: 0 0 36px rgba(108,99,255,0.7), inset 0 0 24px rgba(167,139,250,0.4); }
+  }
+  /* Eye symbol inside core */
+  .so-core::after {
+    content: '◎'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: rgba(167,139,250,0.7);
+    animation: soSpin 6s linear infinite;
+  }
+
+  /* ── BRAND TITLE IN OVERLAY ── */
+  .so-brand {
+    position: relative; z-index: 5; text-align: center;
+  }
+  .so-brand-name {
+    font-family: 'Playfair Display', serif; font-size: 20px; color: var(--text);
+    letter-spacing: 1px; display: block;
+  }
+  .so-brand-sub {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--text-faint); letter-spacing: 3px; text-transform: uppercase; display: block; margin-top: 3px;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .so-prog { position: relative; z-index: 5; width: clamp(240px, 60vw, 300px); }
+  .so-prog-top { display: flex; justify-content: space-between; margin-bottom: 7px; }
+  .so-prog-lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent2); text-transform: uppercase; letter-spacing: 2px; }
+  .so-prog-pct { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); }
+  .so-prog-track { height: 2px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; }
+  .so-prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--gold)); border-radius: 99px; transition: width 0.35s ease; position: relative; }
+  .so-prog-fill::after { content: ''; position: absolute; right: 0; top: -2px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold2); box-shadow: 0 0 8px var(--gold); }
+
+  /* ── STEP LIST ── */
+  .so-steps { position: relative; z-index: 5; display: flex; flex-direction: column; gap: 6px; width: clamp(240px, 60vw, 300px); }
+  .so-step {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    border-radius: 10px; background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    font-size: 12px; color: rgba(240,244,255,0.3); transition: all 0.4s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .so-step.active {
+    background: rgba(108,99,255,0.12); border-color: rgba(108,99,255,0.3);
+    color: var(--accent2); box-shadow: 0 0 16px rgba(108,99,255,0.1);
+  }
+  .so-step.done { background: rgba(45,212,191,0.06); border-color: rgba(45,212,191,0.2); color: var(--teal); }
+  .so-step-ico { font-size: 13px; flex-shrink: 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .header { height: 56px; }
+    .brand-sub { display: none; }
+    .step-bar { margin-top: 20px; }
+    .step-label { font-size: 11px; }
+    .main-wrap { margin-top: 18px; }
+    .stats-grid { gap: 7px; }
+    .stat-val { font-size: 24px; }
+    .mc-details { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .header-pill { display: none; }
+    .mc-name { font-size: 15px; }
+    .btn-search { font-size: 9px; padding: 2px 7px; }
+    .card-hdr { padding: 12px 16px; }
+    .card-body { padding: 14px; gap: 12px; }
+    .scan-anim { width: 130px; height: 130px; }
+    .so-r0 { inset: 0; }
+    .so-r1 { inset: 8px; }
+    .so-r2 { inset: 24px; }
+    .so-r3 { inset: 40px; }
+    .so-core { inset: 50px; }
+    .so-dot1 { inset: 8px; }
+    .so-dot2 { inset: 24px; }
+  }
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .main-wrap { max-width: 720px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+`;
 
 const SCAN_STEPS = [
   { icon: "🖼️", label: "Loading image data" },
@@ -593,136 +682,103 @@ export default function PrescriptionScanner() {
 
   const handleDrop = useCallback((e) => {
     e.preventDefault(); setDragging(false);
-    handleFile(e.dataTransfer.files[0]);
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
   }, [handleFile]);
 
-  const animateScanSteps = useCallback(() => {
-    const delays = [0, 800, 1800, 2800];
-    const durations = [700, 900, 900, 600];
-    delays.forEach((delay, i) => {
-      setTimeout(() => { setActiveScanStep(i); setScanProgress(Math.round(((i + 1) / SCAN_STEPS.length) * 85)); }, delay);
-      setTimeout(() => { setDoneScanSteps(prev => [...prev, i]); }, delay + durations[i]);
+  const animateScanSteps = () => {
+    SCAN_STEPS.forEach((_, i) => {
+      const delay = i * 1800;
+      setTimeout(() => {
+        setActiveScanStep(i);
+        setScanProgress(Math.round(((i + 1) / SCAN_STEPS.length) * 85));
+      }, delay);
+      if (i > 0) setTimeout(() => setDoneScanSteps(prev => [...prev, i - 1]), delay);
     });
-  }, []);
+  };
 
   const scanPrescription = async () => {
-    if (!imageBase64) return;
+    if (!imageBase64 || !apiKey) return;
     setUploadExiting(true);
-    await new Promise(r => setTimeout(r, 450));
-    setPhase("scanning"); setScanProgress(0); setActiveScanStep(0); setDoneScanSteps([]);
-    const scanStart = Date.now();
-    animateScanSteps();
-
-    let parsed = null, apiError = null;
-    try {
-      const prompt = "You are a medical prescription scanner. Analyze this prescription image carefully and extract ALL details.\n" +
-        "Return ONLY valid JSON with no markdown, no backticks, no extra text:\n" +
-        '{"patientName":"string or null","doctorName":"string or null","date":"string or null",' +
-        '"generalNotes":"any doctor notes or null",' +
-        '"medications":[{"name":"exact name","description":"1-2 sentences on what this medicine is and what it treats",' +
-        '"dosage":"strength like 500mg or null","frequency":"how often or null","duration":"how long or null",' +
-        '"instructions":"special notes or null","quantity":"tablet count or null","confidence":85}]}' +
-        "\nRules: 1) Extract every single medication listed. 2) description is REQUIRED for every medication - never null. 3) Use JSON null (not the word null) for unknown fields. 4) confidence is 0-100 how clearly you could read that medicine name.";
-
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          max_tokens: 2000,
-          messages: [{
-            role: "user",
-            content: [
-              { type: "image_url", image_url: { url: "data:" + imageBase64.type + ";base64," + imageBase64.data } },
-              ...extraImages.map(img => ({ type: "image_url", image_url: { url: "data:" + img.type + ";base64," + img.base64 } })),
-              { type: "text", text: prompt + (extraImages.length > 0 ? "\nNote: This prescription spans " + (1 + extraImages.length) + " pages. Extract medications from all pages." : "") }
-            ]
-          }]
-        })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error("Groq Error: " + data.error.message);
-      if (!data.choices) throw new Error("No response from API");
-      let text = data.choices[0].message.content;
-      text = text.replaceAll("```json", "").replaceAll("```", "").trim();
-      parsed = JSON.parse(text);
-    } catch (err) {
-      apiError = err.message || "Failed to scan. Please try again.";
-    }
-
-    const elapsed = Date.now() - scanStart;
-    if (elapsed < 3600) await new Promise(r => setTimeout(r, 3600 - elapsed));
-    setScanProgress(100); setDoneScanSteps([0, 1, 2, 3]);
-    await new Promise(r => setTimeout(r, 700));
-    setOverlayExiting(true);
-    await new Promise(r => setTimeout(r, 600));
-    if (apiError) { setError(apiError); } else { setResult(parsed); saveToHistory(parsed); }
-    setPhase("results"); setOverlayExiting(false);
+    setTimeout(async () => {
+      setPhase("scanning"); setError(null);
+      setScanProgress(0); setActiveScanStep(0); setDoneScanSteps([]);
+      animateScanSteps();
+      const allImages = [imageBase64, ...extraImages.map(e => ({ data: e.data, type: e.type }))];
+      const imgContent = allImages.map(img => ({ type: "image_url", image_url: { url: `data:${img.type};base64,${img.data}` } }));
+      try {
+        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+          body: JSON.stringify({
+            model: "meta-llama/llama-4-scout-17b-16e-instruct",
+            max_tokens: 2000,
+            messages: [{
+              role: "user",
+              content: [
+                ...imgContent,
+                { type: "text", text: `Analyze this prescription image and extract ALL information. Return ONLY valid JSON, no markdown:\n{\n  "patientName": "string or null",\n  "doctorName": "string or null",\n  "date": "string or null",\n  "generalNotes": "string or null",\n  "medications": [{\n    "name": "BRAND NAME ONLY — never include dosage or strength in name field",\n    "description": "1-2 sentence plain-language explanation — NEVER null",\n    "dosage": "strength like 500mg or null",\n    "frequency": "how often or null",\n    "duration": "how long or null",\n    "instructions": "special instructions or null",\n    "quantity": "tablet count or null",\n    "confidence": 85\n  }]\n}\nRules: 1) medicine name must be brand name only, no dosage. 2) description is always filled. 3) confidence 0-100. 4) Return ONLY JSON.` }
+              ]
+            }]
+          })
+        });
+        const data = await res.json();
+        setScanProgress(95);
+        if (data.choices) {
+          let text = data.choices[0].message.content.replaceAll("```json","").replaceAll("```","").trim();
+          const parsed = JSON.parse(text);
+          setScanProgress(100);
+          setTimeout(() => setDoneScanSteps([0,1,2,3]), 400);
+          setTimeout(() => {
+            setOverlayExiting(true);
+            setTimeout(() => { setResult(parsed); setPhase("results"); saveToHistory(parsed); setOverlayExiting(false); }, 600);
+          }, 900);
+        } else {
+          throw new Error(data.error?.message || "Unknown error");
+        }
+      } catch(e) {
+        setOverlayExiting(true);
+        setTimeout(() => { setError(e.message); setPhase("results"); setOverlayExiting(false); }, 600);
+      }
+    }, 500);
   };
 
-  const resetAll = () => {
-    setPhase("upload"); setImage(null); setImageBase64(null);
-    setResult(null); setError(null); setScanProgress(0);
-    setActiveScanStep(0); setDoneScanSteps([]); setUploadExiting(false); setTranslated(null); setExtraImages([]); setInteractions(null);
-  };
+  const resetAll = () => { setPhase("upload"); setImage(null); setImageBase64(null); setResult(null); setError(null); setExtraImages([]); setTranslated(null); setInteractions(null); setUploadExiting(false); };
 
-  const saveToHistory = (data) => {
-    const entry = {
-      id: Date.now(),
-      scannedAt: new Date().toLocaleString(),
-      patientName: data.patientName || "Unknown Patient",
-      doctorName: data.doctorName || "Unknown Doctor",
-      date: data.date || "",
-      medCount: data.medications?.length || 0,
-      data: data,
-    };
-    const updated = [entry, ...history].slice(0, 20);
+  const saveToHistory = (parsed) => {
+    const entry = { id: Date.now(), patientName: parsed.patientName || "Unknown", doctorName: parsed.doctorName || "Unknown", medCount: (parsed.medications || []).length, scannedAt: new Date().toLocaleString("en-IN", { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" }), data: parsed };
+    const updated = [entry, ...history].slice(0, 5);
     setHistory(updated);
-    localStorage.setItem("vaidyadrishti_history", JSON.stringify(updated));
+    try { localStorage.setItem("vaidyadrishti_history", JSON.stringify(updated)); } catch(e) {}
   };
 
   const copyMed = (med, id) => {
-    const text = [
-      "Medicine: " + med.name,
-      med.dosage ? "Dosage: " + med.dosage : "",
-      med.frequency ? "Frequency: " + med.frequency : "",
-      med.duration ? "Duration: " + med.duration : "",
-      med.instructions ? "Instructions: " + med.instructions : "",
-    ].filter(Boolean).join("\n");
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
-    });
+    const text = ["Medicine: " + med.name, med.dosage ? "Dosage: " + med.dosage : "", med.frequency ? "Frequency: " + med.frequency : "", med.duration ? "Duration: " + med.duration : "", med.instructions ? "Instructions: " + med.instructions : ""].filter(Boolean).join("\n");
+    navigator.clipboard.writeText(text).then(() => { setCopiedId(id); setTimeout(() => setCopiedId(null), 2000); });
   };
 
-  const exportPDF = () => {
+  const exportReport = () => {
     if (!result) return;
     const lines = [];
     lines.push("VAIDYADRISHTI-AI — PRESCRIPTION REPORT");
-    lines.push("================================");
+    lines.push("========================================");
     if (notNull(result.patientName)) lines.push("Patient: " + result.patientName);
     if (notNull(result.doctorName))  lines.push("Doctor:  " + result.doctorName);
     if (notNull(result.date))        lines.push("Date:    " + result.date);
     if (notNull(result.generalNotes)) { lines.push(""); lines.push("Notes: " + result.generalNotes); }
-    lines.push("");
-    lines.push("MEDICATIONS");
-    lines.push("-----------");
+    lines.push(""); lines.push("MEDICATIONS"); lines.push("-----------");
     (result.medications || []).forEach((med, i) => {
-      lines.push("");
-      lines.push((i + 1) + ". " + med.name + (notNull(med.dosage) ? "  [" + med.dosage + "]" : ""));
+      lines.push(""); lines.push((i + 1) + ". " + med.name + (notNull(med.dosage) ? "  [" + med.dosage + "]" : ""));
       if (notNull(med.description))   lines.push("   About:        " + med.description);
       if (notNull(med.frequency))     lines.push("   Frequency:    " + med.frequency);
       if (notNull(med.duration))      lines.push("   Duration:     " + med.duration);
       if (notNull(med.quantity))      lines.push("   Quantity:     " + med.quantity);
       if (notNull(med.instructions))  lines.push("   Instructions: " + med.instructions);
     });
-    lines.push("");
-    lines.push("Generated by VaidyaDrishti — " + new Date().toLocaleString());
+    lines.push(""); lines.push("Generated by VAIDYADRISHTI-AI — " + new Date().toLocaleString());
     const blob = new Blob([lines.join("\n")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "vaidyadrishti_" + Date.now() + ".txt";
-    a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement("a"); a.href = url; a.download = "vaidyadrishti_" + Date.now() + ".txt"; a.click(); URL.revokeObjectURL(url);
   };
 
   const buildSchedule = (medications) => {
@@ -732,15 +788,10 @@ export default function PrescriptionScanner() {
       const freq = (med.frequency || "").toLowerCase();
       const dose = notNull(med.dosage) ? med.dosage : "";
       const entry = { name: med.name, dose };
-      if (freq.includes("once") || freq.includes("1")) {
-        slots.Morning.push(entry);
-      } else if (freq.includes("twice") || freq.includes("2")) {
-        slots.Morning.push(entry); slots.Night.push(entry);
-      } else if (freq.includes("three") || freq.includes("3") || freq.includes("thrice")) {
-        slots.Morning.push(entry); slots.Afternoon.push(entry); slots.Night.push(entry);
-      } else {
-        slots.Morning.push(entry);
-      }
+      if (freq.includes("once") || freq.includes("1")) { slots.Morning.push(entry); }
+      else if (freq.includes("twice") || freq.includes("2")) { slots.Morning.push(entry); slots.Night.push(entry); }
+      else if (freq.includes("three") || freq.includes("3") || freq.includes("thrice")) { slots.Morning.push(entry); slots.Afternoon.push(entry); slots.Night.push(entry); }
+      else { slots.Morning.push(entry); }
     });
     return slots;
   };
@@ -748,28 +799,13 @@ export default function PrescriptionScanner() {
   const translateResult = async () => {
     if (!result || !apiKey) return;
     setTranslating(true); setTranslated(null);
+    const langNames = { te: "Telugu", hi: "Hindi", ta: "Tamil", bn: "Bengali", mr: "Marathi" };
     try {
-      const summary = "Patient: " + (result.patientName || "N/A") + "\n" +
-        "Doctor: " + (result.doctorName || "N/A") + "\n" +
-        "Date: " + (result.date || "N/A") + "\n" +
-        (notNull(result.generalNotes) ? "Notes: " + result.generalNotes + "\n" : "") +
-        "Medications:\n" +
-        (result.medications || []).map((m, i) =>
-          (i+1) + ". " + m.name + (notNull(m.dosage) ? " " + m.dosage : "") +
-          (notNull(m.frequency) ? ", " + m.frequency : "") +
-          (notNull(m.duration) ? ", for " + m.duration : "") +
-          (notNull(m.instructions) ? " (" + m.instructions + ")" : "") +
-          "\n   About: " + (m.description || "")
-        ).join("\n");
-      const langNames = { te: "Telugu", hi: "Hindi", ta: "Tamil", bn: "Bengali", mr: "Marathi" };
+      const summary = "Patient: " + (result.patientName || "N/A") + "\nDoctor: " + (result.doctorName || "N/A") + "\nDate: " + (result.date || "N/A") + (notNull(result.generalNotes) ? "\nNotes: " + result.generalNotes + "\n" : "") + "\nMedications:\n" + (result.medications || []).map((m, i) => (i+1) + ". " + m.name + (notNull(m.dosage) ? " " + m.dosage : "") + (notNull(m.frequency) ? ", " + m.frequency : "") + (notNull(m.duration) ? ", for " + m.duration : "") + (notNull(m.instructions) ? " — " + m.instructions : "")).join("\n");
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          max_tokens: 1500,
-          messages: [{ role: "user", content: "Translate the following medical prescription summary to " + langNames[lang] + ". Keep medicine names in English. Be clear and simple for the patient to understand:\n\n" + summary }]
-        })
+        body: JSON.stringify({ model: "meta-llama/llama-4-scout-17b-16e-instruct", max_tokens: 1500, messages: [{ role: "user", content: "Translate the following prescription summary into " + langNames[lang] + ". Keep medicine names in English. Return only the translation:\n\n" + summary }] })
       });
       const data = await res.json();
       if (data.choices) setTranslated(data.choices[0].message.content);
@@ -778,14 +814,12 @@ export default function PrescriptionScanner() {
   };
 
   const addExtraPage = (file) => {
-    if (!file || !file.type.startsWith("image/")) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      setExtraImages(prev => [...prev, { url: URL.createObjectURL(file), base64: e.target.result.split(",")[1], type: file.type }]);
+      setExtraImages(prev => [...prev, { url: URL.createObjectURL(file), data: e.target.result.split(",")[1], type: file.type }]);
     };
     reader.readAsDataURL(file);
   };
-
   const removeExtraPage = (idx) => setExtraImages(prev => prev.filter((_, i) => i !== idx));
 
   const checkInteractions = async () => {
@@ -796,11 +830,7 @@ export default function PrescriptionScanner() {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          max_tokens: 800,
-          messages: [{ role: "user", content: "Check for drug interactions between these medications: " + names + ". Return ONLY JSON (no markdown): {interactions:[{drug1,drug2,severity,description}],safe:boolean}. If none, return {interactions:[],safe:true}." }]
-        })
+        body: JSON.stringify({ model: "meta-llama/llama-4-scout-17b-16e-instruct", max_tokens: 800, messages: [{ role: "user", content: "Check for drug interactions between: " + names + ". Return ONLY JSON (no markdown): {interactions:[{drug1,drug2,severity,description}],safe:boolean}. If none, return {interactions:[],safe:true}." }] })
       });
       const data = await res.json();
       if (data.choices) {
@@ -812,9 +842,9 @@ export default function PrescriptionScanner() {
   };
 
   const getConfColor = (score) => {
-    if (score >= 85) return "var(--emerald)";
-    if (score >= 60) return "var(--cyan)";
-    return "rgba(251,146,60,0.9)";
+    if (score >= 85) return "var(--teal)";
+    if (score >= 60) return "var(--accent2)";
+    return "var(--gold)";
   };
 
   const medCount = result?.medications?.length || 0;
@@ -825,82 +855,99 @@ export default function PrescriptionScanner() {
     <>
       <style>{styles}</style>
       <div className="app">
-        <div className="orb orb1" /><div className="orb orb2" />
 
+        {/* HEADER */}
         <header className="header">
           <div className="header-left">
-            <div className="logo">⚕️</div>
-            <div className="brand"><h1>VaidyaDrishti<span style={{fontFamily:"IBM Plex Mono,monospace",fontSize:"11px",color:"var(--saffron)",marginLeft:"6px",fontWeight:500,verticalAlign:"middle",opacity:0.85}}>AI</span></h1><p>वैद्यदृष्टि — AI Prescription Vision</p></div>
+            <div className="logo">👁</div>
+            <div>
+              <div className="brand-name">VaidyaDrishti <span>AI</span></div>
+              <div className="brand-sub">वैद्यदृष्टि · Prescription Vision</div>
+            </div>
           </div>
-          <div className="header-badge"><div className="pulse-dot" />Groq Vision API</div>
+          <div className="header-pill">
+            <div className="live-dot" />
+            Groq Vision
+          </div>
         </header>
 
+        {/* STEP BAR */}
         <div className="step-bar">
           <div className="step-item">
-            <div className={`step-circle ${phase === "upload" ? "active" : "done"}`}>{phase === "upload" ? "01" : "✓"}</div>
-            <div className="step-info"><div className="step-title">Upload</div><div className="step-sub">{phase === "upload" ? "Choose image" : "Complete"}</div></div>
+            <div className={`step-num ${phase === "upload" ? "active" : "done"}`}>{phase === "upload" ? "01" : "✓"}</div>
+            <div className="step-label">Upload</div>
           </div>
-          <div className={`step-connector ${step1Done ? "active" : ""}`} />
+          <div className={`step-line ${step1Done ? "active" : ""}`} />
           <div className={`step-item ${phase === "upload" ? "inactive" : ""}`}>
-            <div className={`step-circle ${phase === "scanning" ? "active scanning-pulse" : phase === "results" ? "done" : ""}`}>{phase === "results" ? "✓" : "02"}</div>
-            <div className="step-info"><div className="step-title">Scanning</div><div className="step-sub">{phase === "scanning" ? "Analyzing..." : phase === "results" ? "Complete" : "Waiting"}</div></div>
+            <div className={`step-num ${phase === "scanning" ? "active scanning-pulse" : phase === "results" ? "done" : ""}`}>{phase === "results" ? "✓" : "02"}</div>
+            <div className="step-label">Scan</div>
           </div>
-          <div className={`step-connector ${step2Active ? "active" : ""}`} />
+          <div className={`step-line ${step2Active ? "active" : ""}`} />
           <div className={`step-item ${phase !== "results" ? "inactive" : ""}`}>
-            <div className={`step-circle ${phase === "results" ? "active" : ""}`}>03</div>
-            <div className="step-info"><div className="step-title">Results</div><div className="step-sub">{phase === "results" ? medCount + " found" : "Pending"}</div></div>
+            <div className={`step-num ${phase === "results" ? "active" : ""}`}>03</div>
+            <div className="step-label">Results</div>
           </div>
         </div>
 
+        {/* MAIN */}
         <div className="main-wrap">
+
+          {/* UPLOAD PHASE */}
           {phase === "upload" && (
-            <div className={`upload-card${uploadExiting ? " exit" : ""}`}>
+            <div className={`card${uploadExiting ? " exit" : ""}`}>
               <div className="card-hdr">
                 <span className="card-lbl">Prescription Image</span>
                 <span className="card-tag">Step 01 — Upload</span>
               </div>
-              <div className="upload-body">
+              <div className="card-body">
                 {!image ? (
                   <div className={`drop-zone${dragging ? " dz-on" : ""}`}
                     onDragOver={e => { e.preventDefault(); setDragging(true); }}
                     onDragLeave={() => setDragging(false)} onDrop={handleDrop}>
                     <input type="file" accept="image/*" onChange={e => handleFile(e.target.files[0])} />
-                    <div className="dz-icon">📋</div>
-                    <div className="dz-text"><h3>Drop your prescription here</h3><p>or click to browse files</p></div>
-                    <div className="fmt-chips">{["JPG","PNG","WEBP","PDF"].map(f => <span key={f} className="fchip">{f}</span>)}</div>
+                    <div className="dz-icon-wrap">📋</div>
+                    <div>
+                      <div className="dz-title">Drop your prescription here</div>
+                      <div className="dz-sub">or click to browse files</div>
+                    </div>
+                    <div className="fmt-chips">{["JPG","PNG","WEBP"].map(f => <span key={f} className="fchip">{f}</span>)}</div>
                   </div>
                 ) : (
                   <div className="preview-wrap">
                     <img src={image} alt="Prescription" />
-                    <div className="preview-lbl">✓  Image loaded — ready to scan</div>
+                    <div className="preview-lbl">✓ Image loaded — ready to scan</div>
                   </div>
                 )}
+
+                {/* HISTORY */}
                 {history.length > 0 && (
-                  <div className="history-section">
-                    <div className="history-hdr">
-                      <span className="history-title">Recent Scans</span>
-                      <button className="btn-clear-history" onClick={() => { setHistory([]); localStorage.removeItem("vaidyadrishti_history"); }}>Clear</button>
+                  <div>
+                    <div className="hist-hdr">
+                      <span className="hist-title">Recent Scans</span>
+                      <button className="btn-clr-hist" onClick={() => { setHistory([]); localStorage.removeItem("vaidyadrishti_history"); }}>Clear</button>
                     </div>
-                    <div className="history-list">
+                    <div className="hist-list">
                       {history.slice(0, 5).map(h => (
-                        <div className="history-item" key={h.id} onClick={() => { setResult(h.data); setPhase("results"); }}>
-                          <div className="history-info">
-                            <div className="history-patient">{h.patientName}</div>
-                            <div className="history-meta">{h.doctorName} · {h.scannedAt}</div>
+                        <div className="hist-item" key={h.id} onClick={() => { setResult(h.data); setPhase("results"); }}>
+                          <div>
+                            <div className="hist-patient">{h.patientName}</div>
+                            <div className="hist-meta">{h.doctorName} · {h.scannedAt}</div>
                           </div>
-                          <span className="history-badge">{h.medCount} meds</span>
+                          <span className="hist-badge">{h.medCount} meds</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+
+                {/* MULTI PAGE */}
                 {image && (
-                  <div>
-                    <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
-                      <span style={{fontFamily:"JetBrains Mono,monospace",fontSize:"9.5px",textTransform:"uppercase",letterSpacing:"1.8px",color:"var(--text-faint)"}}>Pages</span>
-                      <span className="page-count-badge">{1 + extraImages.length} page{(1 + extraImages.length) > 1 ? "s" : ""}</span>
+                  <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+                    <div className="pages-lbl">
+                      <span>Pages</span>
+                      <span className="page-badge">{1 + extraImages.length} page{(1 + extraImages.length) > 1 ? "s" : ""}</span>
                     </div>
-                    <div className="multi-images">
+                    <div className="thumbs-row">
                       <div className="thumb-wrap"><img src={image} alt="p1" /></div>
                       {extraImages.map((img, i) => (
                         <div className="thumb-wrap" key={i}>
@@ -908,95 +955,94 @@ export default function PrescriptionScanner() {
                           <button className="thumb-del" onClick={() => removeExtraPage(i)}>✕</button>
                         </div>
                       ))}
-                      <label className="btn-add-page" title="Add page">
+                      <label className="btn-add-thumb" title="Add page">
                         <input type="file" accept="image/*" style={{display:"none"}} onChange={e => { if(e.target.files[0]) addExtraPage(e.target.files[0]); e.target.value=""; }} />
                         +
                       </label>
                     </div>
                   </div>
                 )}
+
+                {/* API KEY */}
                 <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
-                  <label style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9.5px",textTransform:"uppercase",letterSpacing:"1.8px",color:"rgba(240,249,255,0.28)"}}>Groq API Key</label>
-                  <input type="password" placeholder="gsk_..." value={apiKey} onChange={e => setApiKey(e.target.value)}
-                    style={{width:"100%",padding:"10px 14px",background:"rgba(255,255,255,0.04)",
-                      border:apiKey ? "1px solid rgba(16,185,129,0.35)" : "1px solid rgba(255,255,255,0.1)",
-                      borderRadius:"10px",color:"#f0f9ff",fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",outline:"none"}} />
-                  {!apiKey && <p style={{fontSize:"11px",color:"rgba(239,68,68,0.7)",fontFamily:"'JetBrains Mono',monospace"}}>⚠ Groq API key required — get one free at console.groq.com</p>}
+                  <label className="api-label">Groq API Key</label>
+                  <input
+                    type="password" placeholder="gsk_..." value={apiKey}
+                    onChange={e => setApiKey(e.target.value)}
+                    className={`api-input${apiKey ? " has-key" : ""}`}
+                  />
                 </div>
-                <button className="btn-scan" onClick={scanPrescription} disabled={!image || !apiKey}><span>🔬</span> Scan Prescription</button>
-                {image && <button className="btn-clear" onClick={resetAll}>Clear & upload new image</button>}
+
+                <button className="btn-primary" onClick={scanPrescription} disabled={!image || !apiKey}>
+                  <span>🔬</span> Analyze Prescription
+                </button>
+                {image && <button className="btn-ghost" onClick={resetAll}>✕ Clear</button>}
               </div>
             </div>
           )}
 
+          {/* RESULTS PHASE */}
           {phase === "results" && (
-            <div className="results-card">
+            <div className="card card-enter">
               <div className="card-hdr">
-                <span className="card-lbl">Extracted Medications</span>
-                {result && <span className="count-pill">{medCount} medication{medCount !== 1 ? "s" : ""} found</span>}
+                <span className="card-lbl">Analysis Results</span>
+                <span className="card-tag">Step 03 — Complete</span>
               </div>
-              <div className="results-body">
-                {error && <div className="err-box"><span>⚠️</span><span>{error}</span></div>}
-                {result && (
+              <div className="card-body">
+                {error ? (
+                  <div className="err-box"><span>⚠️</span><span>{error}</span></div>
+                ) : result && (
                   <>
-                    <div className="results-actions">
-                      <button className="btn-pdf" onClick={exportPDF}>📄 Export Report</button>
-                    </div>
-                    <div className="stats-grid">
-                      {[
-                        { icon:"💊", val:medCount, lbl:"Medications" },
-                        { icon:"✅", val:result.medications?.filter(m => notNull(m.dosage)).length || 0, lbl:"With dosage" },
-                        { icon:"📋", val:result.medications?.filter(m => notNull(m.instructions)).length || 0, lbl:"With instructions" },
-                      ].map((s, i) => (
-                        <div className="stat-tile" key={i}>
-                          <div className="st-icon">{s.icon}</div>
-                          <div className="st-val">{s.val}</div>
-                          <div className="st-lbl">{s.lbl}</div>
-                        </div>
-                      ))}
+                    {/* ACTIONS */}
+                    <div style={{display:"flex",gap:"8px",flexWrap:"wrap"}}>
+                      <button className="btn-action" onClick={exportReport}>📄 Export Report</button>
                     </div>
 
+                    {/* STATS */}
+                    <div className="stats-grid">
+                      <div className="stat-tile"><div className="stat-ico">💊</div><div className="stat-val">{medCount}</div><div className="stat-lbl">Medicines</div></div>
+                      <div className="stat-tile"><div className="stat-ico">📏</div><div className="stat-val">{(result.medications||[]).filter(m=>notNull(m.dosage)).length}</div><div className="stat-lbl">With Dosage</div></div>
+                      <div className="stat-tile"><div className="stat-ico">📝</div><div className="stat-val">{(result.medications||[]).filter(m=>notNull(m.instructions)).length}</div><div className="stat-lbl">With Notes</div></div>
+                    </div>
+
+                    {/* NOTES */}
                     {notNull(result.generalNotes) && (
                       <div className="notes-box">
-                        <div className="nlbl">General Notes</div>
-                        <div className="ntxt">{result.generalNotes}</div>
+                        <div className="notes-lbl">General Notes</div>
+                        <div className="notes-txt">{result.generalNotes}</div>
                       </div>
                     )}
 
+                    {/* PATIENT INFO */}
                     {(notNull(result.patientName) || notNull(result.doctorName) || notNull(result.date)) && (
                       <div className="info-box">
-                        <div className="ibox-hdr">Prescription Info</div>
-                        {notNull(result.patientName) && <div className="irow"><span className="ikey">Patient</span><span className="ival">{result.patientName}</span></div>}
-                        {notNull(result.doctorName) && <div className="irow"><span className="ikey">Doctor</span><span className="ival">{result.doctorName}</span></div>}
-                        {notNull(result.date) && <div className="irow"><span className="ikey">Date</span><span className="ival">{result.date}</span></div>}
+                        <div className="info-hdr">Prescription Info</div>
+                        {notNull(result.patientName) && <div className="info-row"><span className="info-key">Patient</span><span className="info-val">{result.patientName}</span></div>}
+                        {notNull(result.doctorName) && <div className="info-row"><span className="info-key">Doctor</span><span className="info-val">{result.doctorName}</span></div>}
+                        {notNull(result.date) && <div className="info-row"><span className="info-key">Date</span><span className="info-val">{result.date}</span></div>}
                       </div>
                     )}
 
-                    <div className="sec-lbl">Medications</div>
-
-                    {result.medications && result.medications.length > 0
-                      ? result.medications.map((med, i) => (
+                    {/* MED CARDS */}
+                    <div className="sec-div">Medications</div>
+                    {(result.medications || []).length > 0
+                      ? (result.medications || []).map((med, i) => (
                         <div className="med-card" key={i}>
                           <div className="mc-top">
                             <div className="mc-name-row">
                               <span className="mc-name">{med.name}</span>
-                              <a className="btn-search" href={"https://www.1mg.com/search/all?name=" + encodeURIComponent(med.name)} target="_blank" rel="noreferrer">🛒 1mg</a>
-                              <a className="btn-search" href={"https://www.netmeds.com/catalogsearch/result?q=" + encodeURIComponent(med.name)} target="_blank" rel="noreferrer">🛒 Netmeds</a>
+                              <a className="btn-search" href={"https://www.1mg.com/search/all?name=" + encodeURIComponent(med.name)} target="_blank" rel="noopener noreferrer">🛒 1mg</a>
+                              <a className="btn-search" href={"https://www.netmeds.com/catalogsearch/result?q=" + encodeURIComponent(med.name)} target="_blank" rel="noopener noreferrer">🛒 Netmeds</a>
                             </div>
                             <div style={{display:"flex",alignItems:"center",gap:"6px",flexShrink:0}}>
-                              {notNull(med.dosage) && <div className="mc-badge">{med.dosage}</div>}
-                              <button className={"btn-copy" + (copiedId === i ? " copied" : "")} onClick={() => copyMed(med, i)}>{copiedId === i ? "✓ Copied" : "📋 Copy"}</button>
+                              {notNull(med.dosage) && <span className="mc-badge">{med.dosage}</span>}
+                              <button className={`btn-sm${copiedId === i ? " copied" : ""}`} onClick={() => copyMed(med, i)}>{copiedId === i ? "✓ Copied" : "📋 Copy"}</button>
                             </div>
                           </div>
-                          {notNull(med.description) && (
-                            <div className="mc-desc">
-                              <span className="mc-desc-i">ℹ</span>
-                              <span>{med.description}</span>
-                            </div>
-                          )}
-                          {med.confidence !== undefined && med.confidence !== null && (
-                            <div className="confidence-bar">
-                              <span className="conf-label">Confidence</span>
+                          {notNull(med.description) && <div className="mc-desc">ℹ {med.description}</div>}
+                          {med.confidence != null && (
+                            <div className="conf-row">
+                              <span className="conf-lbl">Confidence</span>
                               <div className="conf-track"><div className="conf-fill" style={{width: med.confidence + "%", background: getConfColor(med.confidence)}} /></div>
                               <span className="conf-pct">{med.confidence}%</span>
                             </div>
@@ -1012,73 +1058,72 @@ export default function PrescriptionScanner() {
                       ))
                       : <div className="err-box"><span>⚠️</span><span>No medications could be extracted.</span></div>
                     }
-                  </>
-                )}
-                {result && result.medications && result.medications.length > 0 && (
-                  <div className="schedule-box">
-                    <div className="schedule-hdr">🕐 Daily Schedule</div>
-                    <div className="schedule-grid">
-                      {Object.entries(buildSchedule(result.medications)).map(([slot, meds]) => (
-                        <div className="schedule-slot" key={slot}>
-                          <div className="slot-time">{slot === "Morning" ? "🌅 Morning" : slot === "Afternoon" ? "☀️ Afternoon" : "🌙 Night"}</div>
-                          <div className="slot-meds">
-                            {meds.length === 0
-                              ? <span style={{fontSize:"11px",color:"var(--text-faint)"}}>—</span>
-                              : meds.map((m, i) => (
-                                <div className="slot-med" key={i}>
-                                  <span className="slot-dose">{m.dose || "•"}</span>
-                                  <span>{m.name}</span>
+
+                    {/* DAILY SCHEDULE */}
+                    {(result.medications||[]).length > 0 && (
+                      <div className="schedule-box">
+                        <div className="sched-hdr">🕐 Daily Schedule</div>
+                        <div className="sched-grid">
+                          {Object.entries(buildSchedule(result.medications)).map(([slot, meds]) => (
+                            <div className="sched-slot" key={slot}>
+                              <div className="slot-time">{slot === "Morning" ? "🌅 Morning" : slot === "Afternoon" ? "☀️ Afternoon" : "🌙 Night"}</div>
+                              <div className="slot-meds">
+                                {meds.length === 0
+                                  ? <span style={{fontSize:"11px",color:"var(--text-faint)"}}>—</span>
+                                  : meds.map((m, i) => <div className="slot-med" key={i}><span className="slot-dose">{m.dose || "•"}</span><span>{m.name}</span></div>)
+                                }
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* DRUG INTERACTIONS */}
+                    {(result.medications||[]).length >= 2 && (
+                      <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+                        <button className="btn-danger" onClick={checkInteractions} disabled={checking}>
+                          {checking ? "⏳ Checking..." : "⚠️ Check Drug Interactions"}
+                        </button>
+                        {interactions && (
+                          <div className="int-box">
+                            <div className="int-hdr">⚠️ Drug Interactions</div>
+                            {interactions.safe && interactions.interactions.length === 0
+                              ? <div className="int-safe">✅ No known interactions found.</div>
+                              : (interactions.interactions || []).map((ix, i) => (
+                                <div className="int-item" key={i}>
+                                  <div className="int-pair">{ix.drug1} ↔ {ix.drug2} · {ix.severity || "moderate"}</div>
+                                  <div>{ix.description}</div>
                                 </div>
                               ))
                             }
                           </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* TRANSLATE */}
+                    <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+                      <div className="translate-row">
+                        <select className="lang-select" value={lang} onChange={e => { setLang(e.target.value); setTranslated(null); }}>
+                          <option value="te">Telugu</option>
+                          <option value="hi">Hindi</option>
+                          <option value="ta">Tamil</option>
+                          <option value="bn">Bengali</option>
+                          <option value="mr">Marathi</option>
+                        </select>
+                        <button className="btn-action" onClick={translateResult} disabled={translating}>
+                          {translating ? "⏳ Translating..." : "🌐 Translate"}
+                        </button>
+                      </div>
+                      {translated && (
+                        <div className="translated-box">
+                          <div className="trans-hdr">🌐 Translated Summary</div>
+                          <div className="trans-txt">{translated}</div>
                         </div>
-                      ))}
+                      )}
                     </div>
-                  </div>
-                )}
-                {result && result.medications && result.medications.length >= 2 && (
-                  <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
-                    <button className="btn-interactions" onClick={checkInteractions} disabled={checking}>
-                      {checking ? "⏳ Checking..." : "⚠️ Check Drug Interactions"}
-                    </button>
-                    {interactions && (
-                      <div className="interaction-box">
-                        <div className="interaction-hdr">⚠️ Drug Interactions</div>
-                        {interactions.safe && interactions.interactions.length === 0
-                          ? <div className="no-interactions">✅ No known interactions found between these medications.</div>
-                          : (interactions.interactions || []).map((ix, i) => (
-                            <div className="interaction-item" key={i}>
-                              <div className="interaction-pair">{ix.drug1} ↔ {ix.drug2} · {ix.severity || "moderate"}</div>
-                              <div>{ix.description}</div>
-                            </div>
-                          ))
-                        }
-                      </div>
-                    )}
-                  </div>
-                )}
-                {result && (
-                  <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
-                    <div className="translate-row">
-                      <select className="lang-select" value={lang} onChange={e => { setLang(e.target.value); setTranslated(null); }}>
-                        <option value="te">Telugu</option>
-                        <option value="hi">Hindi</option>
-                        <option value="ta">Tamil</option>
-                        <option value="bn">Bengali</option>
-                        <option value="mr">Marathi</option>
-                      </select>
-                      <button className="btn-translate" onClick={translateResult} disabled={translating}>
-                        {translating ? "⏳ Translating..." : "🌐 Translate"}
-                      </button>
-                    </div>
-                    {translated && (
-                      <div className="translated-box">
-                        <div className="translated-hdr">🌐 Translated Summary</div>
-                        <div className="translated-text">{translated}</div>
-                      </div>
-                    )}
-                  </div>
+                  </>
                 )}
                 <button className="btn-rescan" onClick={resetAll}>↩ Scan Another Prescription</button>
               </div>
@@ -1086,45 +1131,49 @@ export default function PrescriptionScanner() {
           )}
         </div>
 
+        {/* SCAN OVERLAY */}
         {phase === "scanning" && (
           <div className={`scan-overlay${overlayExiting ? " exit" : ""}`}>
+            <div className="scan-particles" />
+
             {image && (
-              <div className="scan-image-wrap">
+              <div className="scan-frame">
                 <img src={image} alt="Scanning" />
-                <div className="laser-line" />
+                <div className="scan-beam" />
                 <div className="scan-corner sc-tl" /><div className="scan-corner sc-tr" />
                 <div className="scan-corner sc-bl" /><div className="scan-corner sc-br" />
               </div>
             )}
-            <div className="scan-brand">VaidyaDrishti AI</div>
-            <div className="mandala-wrap">
-              <div className="mandala-orbit">
-                <div className="mandala-petal" />
-                <div className="mandala-petal" />
-                <div className="mandala-petal" />
-                <div className="mandala-petal" />
-                <div className="mandala-petal" />
-                <div className="mandala-petal" />
-                <div className="mandala-petal" />
-                <div className="mandala-petal" />
-              </div>
-              <div className="mandala-ring1" />
-              <div className="mandala-ring2" />
-              <div className="mandala-ring3" />
-              <div className="mandala-ring4" />
-              <div className="mandala-core" />
+
+            <div className="scan-anim">
+              <div className="so-ring so-r0" />
+              <div className="so-ring so-r1" />
+              <div className="so-ring so-r2" />
+              <div className="so-ring so-r3" />
+              <div className="so-dot1" />
+              <div className="so-dot2" />
+              <div className="so-core" />
             </div>
-            <div className="scan-prog-wrap">
-              <div className="scan-prog-label">
-                <span className="scan-prog-title">विश्लेषण · Analyzing</span>
-                <span className="scan-prog-pct">{scanProgress}%</span>
-              </div>
-              <div className="scan-prog-track"><div className="scan-prog-fill" style={{width: scanProgress + "%"}} /></div>
+
+            <div className="so-brand">
+              <span className="so-brand-name">VaidyaDrishti AI</span>
+              <span className="so-brand-sub">विश्लेषण · Analyzing</span>
             </div>
-            <div className="scan-steps">
+
+            <div className="so-prog">
+              <div className="so-prog-top">
+                <span className="so-prog-lbl">Processing</span>
+                <span className="so-prog-pct">{scanProgress}%</span>
+              </div>
+              <div className="so-prog-track">
+                <div className="so-prog-fill" style={{width: scanProgress + "%"}} />
+              </div>
+            </div>
+
+            <div className="so-steps">
               {SCAN_STEPS.map((s, i) => (
-                <div key={i} className={"scan-step" + (activeScanStep === i && !doneScanSteps.includes(i) ? " active" : "") + (doneScanSteps.includes(i) ? " done" : "")}>
-                  <span className="ss-icon">{doneScanSteps.includes(i) ? "✓" : activeScanStep === i ? s.icon : "○"}</span>
+                <div key={i} className={"so-step" + (activeScanStep === i && !doneScanSteps.includes(i) ? " active" : "") + (doneScanSteps.includes(i) ? " done" : "")}>
+                  <span className="so-step-ico">{doneScanSteps.includes(i) ? "✓" : activeScanStep === i ? s.icon : "○"}</span>
                   {s.label}
                 </div>
               ))}
