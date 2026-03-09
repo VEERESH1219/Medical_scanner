@@ -442,7 +442,7 @@ export default function PrescriptionScanner() {
 
         {/* ══ NAVBAR ══ */}
         <nav className="navbar">
-          <div className="nav-brand">
+          <div className="nav-brand" onClick={resetAll} style={{ cursor: "pointer" }}>
             <div className="nav-logo">👁</div>
             <div className="nav-title">Vaidya<span>Drishti</span></div>
           </div>
