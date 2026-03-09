@@ -183,8 +183,14 @@ export default function PrescriptionScanner() {
             el.style.opacity = "1";
             el.style.visibility = "visible";
             el.style.transform = "none";
+            el.style.paddingBottom = "40px";
           }
-          // Force solid backgrounds and visibility on cards and hero
+          // Hide elements for a compact share image
+          [".res-actions-bar", ".sb-sched", ".sb-tools", ".btn-rescan", ".navbar"].forEach(s => {
+            const node = clonedDoc.querySelector(s);
+            if (node) node.style.display = "none";
+          });
+
           clonedDoc.querySelectorAll(".med-card").forEach(card => {
             card.style.background = "#ffffff";
             card.style.opacity = "1";
