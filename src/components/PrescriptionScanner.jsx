@@ -171,13 +171,37 @@ export default function PrescriptionScanner() {
     try {
       const canvas = await html2canvas(resultsRef.current, {
         backgroundColor: "#F8FAFC",
-        scale: 2,
+        scale: 3,
         logging: false,
-        useCORS: true
+        useCORS: true,
+        allowTaint: true,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.querySelector(".results-wrap");
+          if (el) {
+            el.style.animation = "none";
+            el.style.transition = "none";
+            el.style.opacity = "1";
+            el.style.visibility = "visible";
+            el.style.transform = "none";
+          }
+          // Force solid backgrounds and visibility on cards and hero
+          clonedDoc.querySelectorAll(".med-card").forEach(card => {
+            card.style.background = "#ffffff";
+            card.style.opacity = "1";
+          });
+          const hero = clonedDoc.querySelector(".res-hero");
+          if (hero) {
+            hero.style.background = "linear-gradient(135deg, #0F766E 0%, #0D9488 40%, #06B6D4 100%)";
+            hero.style.opacity = "1";
+          }
+          clonedDoc.querySelectorAll(".mc-desc-band").forEach(band => {
+            band.style.opacity = "1";
+          });
+        }
       });
 
-      const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", 0.9));
-      const file = new File([blob], "prescription_report.jpg", { type: "image/jpeg" });
+      const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", 0.95));
+      const file = new File([blob], "vaidyadrishti_report.jpg", { type: "image/jpeg" });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
@@ -186,11 +210,10 @@ export default function PrescriptionScanner() {
           text: "Medical Prescription Analysis by VaidyaDrishti AI"
         });
       } else {
-        // Fallback: Download image and open WhatsApp with text
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "prescription_report.jpg";
+        a.download = "vaidyadrishti_report.jpg";
         a.click();
         URL.revokeObjectURL(url);
 
@@ -200,7 +223,6 @@ export default function PrescriptionScanner() {
       setShareModal(false);
     } catch (e) {
       console.error("Share failed", e);
-      // Final fallback to text only
       const text = buildReportText();
       window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
       setShareModal(false);
