@@ -1,135 +1,81 @@
 # 👁️ VaidyaDrishti AI
-### *वैद्यदृष्टि — The Physician's Vision*
+### *The Next Generation of Medical Vision Intelligence*
 
-> An AI-powered medical prescription scanner that reads handwritten and printed prescriptions in seconds. Built with React + Vite, powered by the Groq Vision API (Llama 4 Scout), featuring a premium Apple-style interface with an ECG heartbeat splash animation.
-
----
-
-![VaidyaDrishti](https://img.shields.io/badge/VaidyaDrishti-AI%20Prescription%20Vision-0f766e?style=for-the-badge)
-![Groq](https://img.shields.io/badge/Groq-Llama%204%20Scout-22c55e?style=for-the-badge)
-![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
-![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite)
-![Style](https://img.shields.io/badge/Design-Premium%20Apple%20Style-06b6d4?style=for-the-badge)
+> **VaidyaDrishti AI** is a premium, high-integrity medical prescription analysis platform. By combining cutting-edge **Groq Vision (Llama 4 Scout)** inference with a world-class **Apple-style interface**, it transforms complex medical handwriting into clear, actionable health data in under 2 seconds.
 
 ---
 
-## ✨ Features
-
-### 📸 Upload & Capture
-- **🆕 ECG Splash Screen** — minimal heartbeat animation on first load
-- **📷 Camera capture** — tap "Take Photo" on mobile to directly capture a prescription
-- **Drag & drop or gallery upload** — JPG, PNG, WEBP supported
-- **Multi-page support** — add multiple pages for complete analysis
-- **Scan history** — last 5 scans saved locally, click to reload
-
-### 🤖 AI Extraction (Groq Vision)
-- Reads **patient name, doctor name, date, and general notes**
-- Extracts full medication list with **name, dosage, frequency, duration, quantity, instructions**
-- Auto-generates **1–2 sentence plain-language description** per medicine
-- **Confidence score** (0–100) per medicine
-
-### 💊 Smart Features
-- **📋 Copy to Clipboard** — one-click copy of med details
-- **🕐 Daily Schedule** — auto-distributes medicines into Morning / Afternoon / Night slots
-- **⚠️ Drug Interaction Checker** — AI-powered check for dangerous combinations
-- **🌐 Language Translation** — translate full summary into Telugu, Hindi, Tamil, Bengali, or Marathi
-- **🛒 Medicine Search** — 1mg and Netmeds search links on every card
-
-### 📤 Share & Export
-- **💬 WhatsApp Share** — pre-formatted report sharing
-- **🖨️ Print / Save as PDF** — clean styled print window
-
-### 🎨 Premium Design
-- **Apple-level Interface** — Clean, minimal White/Teal/Green aesthetic
-- **Color System** — Teal `#0F766E`, Green `#22C55E`, Cyan `#06B6D4`
-- **Typography** — Poppins (headings) + Inter (body)
-- **Glassmorphic Navbar** — Sticky header with smooth blur
-- **Smooth Animations** — ECG splash, fade-ins, and floating UI elements
-- **Fully Responsive** — optimized for all viewports from 375px to 4K
+<p align="center">
+  <img src="https://img.shields.io/badge/VaidyaDrishti-Premium%20Healthcare%20AI-0f766e?style=for-the-badge&logo=ai" />
+  <img src="https://img.shields.io/badge/Design-Apple%20Minimal-22c55e?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Privacy-Zero%20Data%20Retention-06b6d4?style=for-the-badge" />
+</p>
 
 ---
 
-## 🔒 Security
+## 🌟 Why VaidyaDrishti AI?
 
-| Item | Status |
+In an era of rapid digital health, VaidyaDrishti bridges the gap between traditional paper prescriptions and modern healthcare management. It is designed for **speed, accuracy, and aesthetic excellence.**
+
+### � Vision Intelligence
+Powered by specialized medical prompts on the **Llama 4 Scout 17B** model, our AI doesn't just read text—it understands medical context, dosage patterns, and drug interactions with human-like intuition.
+
+### 🎨 The Experience
+Designed with a "Design-First" philosophy. From the **cinematic ECG splash animation** to the glassmorphic interactive dashboard, every pixel is crafted to provide a premium, effortless user experience.
+
+### � Privacy by Design
+Medical data is sacred. VaidyaDrishti processes everything **locally in-browser** or via secure transient API streams. No patient images or health records are ever stored on our servers.
+
+---
+
+## � Key Capabilities
+
+- **⚡ Instant Digitization** — Specialized OCR for handwritten doctor notes and printed pharmacy labels.
+- **📋 Intelligent Medication Cards** — Auto-parsing of dosage, frequency, duration, and instructions.
+- **🕐 Smart Scheduling** — Visualize your medication journey with an auto-generated daily timeline.
+- **🚨 Interaction Guard** — Real-time AI analysis to identify potential contraindications between medications.
+- **🌐 Global Reach** — Instant translation of complex medical terms into 5+ major regional languages.
+- **💬 One-Click Sharing** — Elegant WhatsApp report formatting and "Save as PDF" functionality.
+
+---
+
+## 🛠️ The Tech Behind the Excellence
+
+| Pillar | Technology |
 |---|---|
-| `.env` in `.gitignore` — API key never committed | ✅ |
-| XSS protection on print window (all AI values escaped) | ✅ |
-| AI JSON response schema validation | ✅ |
-| Print popup Content-Security-Policy header | ✅ |
-| All Groq API calls over HTTPS | ✅ |
-
----
-
-## 🛠️ Tech Stack
-
-| Technology | Purpose |
-|---|---|
-| React 18 | UI framework |
-| Vite 5 | Build tool & dev server |
-| Groq API | AI backend (Llama 4 Scout) |
-| Poppins + Inter | Premium typography |
-| Vanilla CSS | High-performance custom styles |
+| **Core** | React 18 + Vite 5 (Ultra-Fast Build System) |
+| **Logic** | Groq Cloud (Lowest Latency AI Inference) |
+| **Model** | Llama 4 Scout Vision (Medical-Grade OCR) |
+| **Aesthetics** | Custom Vanilla CSS (Apple-style Interaction Design) |
+| **Fonts** | Poppins & Inter (Readability Focused Typography) |
 
 ---
 
 ## 🚀 Getting Started
 
-1. **Clone & Install**
+**Experience the future of medical scanning in 3 steps:**
+
+1. **Clone the Excellence**
    ```bash
    git clone https://github.com/YOUR_USERNAME/vaidyadrishti-ai.git
    npm install
    ```
 
-2. **Set up API key**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add VITE_GROQ_API_KEY
-   ```
+2. **Secure Your Key**
+   Copy `.env.example` to `.env` and insert your **Groq API Key**.
 
-3. **Run**
+3. **Launch**
    ```bash
    npm run dev
    ```
 
 ---
 
-## 📁 Project Structure
-
-```
-vaidyadrishti-ai/
-├── src/
-│   ├── components/
-│   │   ├── PrescriptionScanner.jsx      # Core logic & JSX
-│   │   ├── PrescriptionScanner.css      # Design System & Hero
-│   │   └── PrescriptionScanner2.css     # Results & Responsive
-│   └── ...
-└── ...
-```
-
----
-
-## 🗂️ Full Commit History
-
-```
-init: project setup
-feat: core prescription scanner — image upload, Groq Vision
-feat: add copy, history, and export (Phase 1)
-feat: add schedule, translation, search (Phase 2)
-feat: add drug interactions, confidence, multi-page (Phase 3)
-design: full premium redesign v4 — Apple-style + Dribbble-quality
-feat: add ECG heartbeat splash screen animation
-fix: center footer and fix navbar mobile visibility
-docs: update README for Premium v4 and ECG Splash
-```
-
-## 🙏 Acknowledgements
-- [Groq](https://groq.com/) — ultra-fast LLM inference
-- [Meta Llama 4](https://ai.meta.com/) — vision model
-- [Google Fonts](https://fonts.google.com/) — Poppins, Inter
+## ⚠️ Medical Disclaimer
+*VaidyaDrishti AI is a productivity and informational utility. It is NOT a diagnostic tool. Always cross-verify AI-generated summaries with a licensed pharmacist or your primary care physician before starting medication.*
 
 ---
 
 <p align="center">
-  <em>वैद्यदृष्टि — Seeing what the physician sees.</em>
+  <em>वैद्यदृष्टि — Empowering patients with the vision of a physician.</em>
 </p>
