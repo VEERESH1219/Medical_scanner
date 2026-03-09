@@ -1648,7 +1648,7 @@
     }
 
     .nav-links {
-        display: none;
+        display: flex;
     }
 
     .step-bar {
@@ -1728,12 +1728,12 @@
 
     .footer-inner {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 8px;
     }
 
     .footer-disclaimer {
-        text-align: left;
+        text-align: center;
     }
 
     .hero-actions {
