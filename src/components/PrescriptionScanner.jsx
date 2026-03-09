@@ -34,6 +34,14 @@ export default function PrescriptionScanner() {
   const [extraImages, setExtraImages] = useState([]);
   const [checking, setChecking] = useState(false);
   const [interactions, setInteractions] = useState(null);
+  const [showSplash, setShowSplash] = useState(true);
+  const [splashFading, setSplashFading] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setSplashFading(true), 1700);
+    const hideTimer = setTimeout(() => setShowSplash(false), 2200);
+    return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
+  }, []);
 
   const handleFile = useCallback((file) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -335,7 +343,45 @@ export default function PrescriptionScanner() {
 
   return (
     <>
-      <div className="app">
+      {/* ══ SPLASH SCREEN ══ */}
+      {showSplash && (
+        <div className={`splash-screen${splashFading ? " splash-fade" : ""}`}>
+          <div className="splash-particles">
+            {[...Array(6)].map((_, i) => <div key={i} className="splash-particle" />)}
+          </div>
+          <div className="splash-ecg-wrap">
+            <svg className="splash-ecg" viewBox="0 0 800 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="ecgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="transparent" />
+                  <stop offset="40%" stopColor="#22C55E" />
+                  <stop offset="50%" stopColor="#4ADE80" />
+                  <stop offset="60%" stopColor="#22C55E" />
+                  <stop offset="100%" stopColor="transparent" />
+                </linearGradient>
+                <filter id="ecgGlow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+              </defs>
+              <polyline
+                className="splash-ecg-line"
+                fill="none" stroke="url(#ecgGrad)" strokeWidth="2.5"
+                filter="url(#ecgGlow)"
+                points="0,60 80,60 120,60 160,60 200,60 230,60 250,58 265,62 280,55 295,65 310,30 320,95 330,10 340,90 350,40 360,60 380,60 420,60 460,60 500,60 530,60 550,58 565,62 580,55 595,65 610,30 620,95 630,10 640,90 650,40 660,60 680,60 720,60 760,60 800,60"
+              />
+            </svg>
+          </div>
+          <div className="splash-content">
+            <div className="splash-logo">👁</div>
+            <h1 className="splash-title">Medical Scanner <span>AI</span></h1>
+            <p className="splash-subtitle">Initializing system...</p>
+            <div className="splash-loader"><div className="splash-loader-fill" /></div>
+          </div>
+        </div>
+      )}
+
+      <div className={`app${showSplash ? " app-hidden" : ""}`}>
 
         {/* ══ NAVBAR ══ */}
         <nav className="navbar">
