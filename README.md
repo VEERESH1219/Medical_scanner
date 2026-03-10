@@ -39,6 +39,83 @@ Medical data is sacred. VaidyaDrishti processes everything **locally in-browser*
 
 ---
 
+## 🛠️ How it Works: End-to-End Flow
+
+```text
+┌─────────────────────────────────────────────────────┐
+│                     USER                            │
+│         Opens VaidyaDrishti AI in browser           │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│              UPLOAD / CAPTURE                       │
+│   📷 Camera (mobile)  │  📂 Gallery  │  🖱 Drag Drop │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│            BROWSER — FileReader API                 │
+│     Converts image file → Base64 string             │
+│     (Everything happens inside the browser)         │
+│     Nothing uploaded to any server yet              │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│              REACT STATE                            │
+│   imageBase64 stored in useState()                  │
+│   Phase switches: "upload" → "scanning"             │
+│   Nexus animation overlay appears on screen         │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│                GROQ API CALL #1                     │
+│   POST https://api.groq.com/openai/v1/chat/...      │
+│   Sends:  Base64 image + structured text prompt     │
+│   Auth:   Bearer VITE_GROQ_API_KEY                  │
+│   Model:  meta-llama/llama-4-scout-17b-16e-instruct │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│           LLAMA 4 SCOUT (on Groq servers)           │
+│   Vision model reads the prescription image         │
+│   Identifies: medicine names, dosage, frequency,    │
+│   duration, instructions, patient name, doctor      │
+│   Returns: structured JSON response                 │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│           SECURITY + VALIDATION LAYER               │
+│   JSON.parse() the response                         │
+│   validateParsed() checks schema, clamps lengths    │
+│   escHtml() sanitizes values — prevents XSS         │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│              RESULTS PAGE RENDERED                  │
+│   Hero banner with 4 stat tiles                     │
+│   Medicine cards (name, dosage, confidence bar)     │
+│   Sidebar (patient info, schedule, tools)           │
+│   Saved to localStorage (scan history)              │
+└──────┬───────────────┬───────────────┬──────────────┘
+       │               │               │
+       ▼               ▼               ▼
+┌──────────┐   ┌──────────────┐  ┌────────────────┐
+│ GROQ #2  │   │   GROQ #3    │  │  SHARE/EXPORT  │
+│Translate │   │Drug Interact │  │💬 WhatsApp     │
+│Telugu,   │   │Checks all    │  │🖨️ Print/PDF    │
+│Hindi,    │   │medicine      │  │                │
+│Tamil...  │   │combinations  │  │                │
+└──────────┘   └──────────────┘  └────────────────┘
+```
+
+---
+
 ## 🛠️ The Tech Behind the Excellence
 
 | Pillar | Technology |
